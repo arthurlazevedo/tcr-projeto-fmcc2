@@ -1,7 +1,7 @@
 export function minimoDivComum(a, b) {
-	const mdc = (a, b) = {
-		if (b == 0) return a;
-		return mdc(b, a%b);
+	const mdc = (a, b) => {
+		if (b === 0) return a;
+		return mdc(b, a % b);
 	}
 
 	if (a > b) return mdc(a, b);
@@ -13,10 +13,11 @@ export function ehPrimo(numero) {
 	if (numero == 2) return true;
 	if (numero % 2 === 0) return false;
 
-	const topo = Math.floor(Math.root(numero));
+	const topo = Math.floor(Math.sqrt(numero));
 	for (let i = 1; i < topo; i += 2) {
 		if (numero % i === 0) return false;
 	}
+
 	return true;
 }
 
@@ -24,9 +25,11 @@ export function ehPrimo(numero) {
 export function totienteEuler(numero) {
 	if (ehPrimo(numero)) return numero - 1;
 	let totiente = 0;
+
 	for (let i = 1; i < numero; i++) {
 		if (coprimos(numero, i)) totiente += 1;
 	}
+
 	return totiente;
 }
 

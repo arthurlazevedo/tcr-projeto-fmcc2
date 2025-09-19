@@ -1,4 +1,4 @@
-import { coprimos, multiplicaLista } from './matematica'; 
+import { coprimos, multiplicaLista } from './nerdolice/matematica.js'; 
 
 export function sistemaTemSolucao(...mods) {
 	for (let i = 0; i < mods.length; i++) {
@@ -9,20 +9,16 @@ export function sistemaTemSolucao(...mods) {
 	return true;
 }
 
-
-
-
 export function calculaN(M, m) {
 	return M/m;
 }
-
 
 // achar um nome melhor do q cdn né pelo amor
 export function resultadoSistema(cdn) {
 	// a lista estará no formato: (c, d, n)
 	return cdn.reduce((somatorio, atual) => {
-		mult = multiplicaLista(atual);
+		const mult = multiplicaLista(atual);
 
-		return somatorio + atual;
+		return somatorio + mult;
 	}, 0);
 }
