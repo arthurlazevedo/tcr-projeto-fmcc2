@@ -1,4 +1,4 @@
-import { coprimos, multiplicaLista } from './nerdolice/matematica.js'; 
+import { coprimos, multiplicaLista } from './matematica.js'; 
 
 export function sistemaTemSolucao(...mods) {
 	for (let i = 0; i < mods.length; i++) {

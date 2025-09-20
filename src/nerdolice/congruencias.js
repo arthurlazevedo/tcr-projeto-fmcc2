@@ -1,4 +1,4 @@
-import { totienteEuler, minimoDivComum, coprimos } from './nerdolice/matematica.js';
+import { totienteEuler, minimoDivComum, coprimos } from './matematica.js';
 
 export function temSolucao(a, b, mod) {
 	return b % minimoDivComum(a, mod) === 0;

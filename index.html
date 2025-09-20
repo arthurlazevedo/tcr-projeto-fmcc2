@@ -4,30 +4,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TCR - Teorema Chinês do Resto</title>
   <meta charset="UTF-8">
-  <link rel="icon" href="/images/favicon.ico" type="image/png">
+  <link rel="icon" href="/icon/favicon.ico" type="image/png">
   <script type="module" src="/src/index.js" defer></script>
 </head>
 <body>
   <main>
     <!-- seção onde serão adicionados os inputs -->
-    <section>
-      <label for="inverso">Calcular Inverso (Para teste, fazer assim: a % m)</label>
-      <br>
-      <input type="text" id="inverso">
-      <button id="calcular">Calcular</button>
-      <br>
-      <div id="resultado-inverso"></div>
-      <br>
-      <br>
-      <label for="tcr">TCR (Teste: fazer assim: x = c1 % m1, x = c2 % m2, x = c3 % m3, ...)</label>
-      <br>
-      <input type="text" id="tcr">
-      <button id="calcular-tcr">Calcular</button>
-      <br>
-      <div id="resultado-tcr"></div>
-    </section>
+    <h4 style="margin-bottom:5px;margin-top:5px;">Formato: (N)x = c (mod m) | (N)x = c % m</h4>
+    <section id="sistemas"></section>
+    <br>
+    <button id="calcular">Calcular</button>
+    <!-- <label for="inverso">Calcular Inverso (Para teste, fazer assim: a % m)</label>
+    <br>
+    <div contenteditable="true" id="inverso" data-value=""></div>
+    <button id="calcular">Calcular</button>
+    <br>
+    <div id="resultado-inverso"></div>
+    <br>
+    <br> -->
     <!-- seção onde será calculado e exibido o resultado -->
-    <section></section>
+    <section>
+      <div id="resultado"></div>
+    </section>
   </main>
 </body>
 </html>
