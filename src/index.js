@@ -1,53 +1,46 @@
-import { multiplicaLista } from './nerdolice/matematica.js';
-import { inversoModular } from './nerdolice/congruencias.js'
-import { calculaN, resultadoSistema } from './nerdolice/tcr.js';
+import { resolverSistema } from "./resultados.js";
 
 const padraoCongruencia = /(\d*)x\s*=\s*(\d+)\s*(?:%\s*(\d+)|\(mod\s*(\d+)\))/;
 
 document.onkeydown = e => {
   if (e.ctrlKey && e.key === 'Enter') {
     e.stopPropagation();
-    btnCalcular.click();
+    if (!btnCalcular.disabled) {
+      btnCalcular.click();
+    }
   }
 }
 
 const btnCalcular = document.getElementById('calcular');
-const resultado   = document.getElementById('resultado');
 const sistemas    = document.getElementById('sistemas');
 
 btnCalcular.onclick = () => {
-  let cdn = [];
-  let M = 1;
+  const congruencias = [];
 
   for (const congruencia of sistemas.children) {
+    if (congruencia.localName === 'button') break;
     const valor = congruencia.children.item(0).value;
+
     if (!valor.match(padraoCongruencia)) {
-      resultado.innerText = 'Algo de errado não está certo em uma dessas congruências aí prc';
+      // resultado.innerText = 'Algo de errado não está certo em uma dessas congruências aí prc';
       return;
     }
-
-    let [_, a, c, posm1, posm2] = padraoCongruencia.exec(valor);
+    
+    const [, a, c, posm1, posm2] = padraoCongruencia.exec(valor);
     const m = posm1 || posm2;
 
-    // congruência não está na sua forma canônica
-    if (a) c = (c * inversoModular(a, m)) % m;
-
-    cdn.push([c, m]);
-    M *= m;
+    // validar se a é 0, se for meter a pata no arrombado
+    congruencias.push({ a: a ?? 1, c, m });
   }
-
-  cdn = cdn.map(([c, m]) => {
-    const N = M/m;
-    const d = inversoModular(N, m);
-
-    return [c, d, N];
-  })
-
-  resultado.innerText = `O resultado é: ${resultadoSistema(cdn) % M} (mod ${M})`
+  
+  const incorretos = resolverSistema(congruencias);
+  if (incorretos) {
+    // todo
+  }
 }
 
 function adicionaNovaCongruencia(noAnterior) {
-  const numeroCongruencia = sistemas.children.length + 1;
+  const numeroCongruencia = sistemas.children.length;
 
   const congruenciaDiv      = document.createElement('div');
     congruenciaDiv.id    = `congruencia-linear-${numeroCongruencia}`;
@@ -81,32 +74,13 @@ function adicionaNovaCongruencia(noAnterior) {
     sistemas.insertBefore(congruenciaDiv, noAnterior.nextSibling);
     congruenciaInput.focus();
   } else {
-    sistemas.appendChild(congruenciaDiv);
+    sistemas.insertBefore(congruenciaDiv, btnCalcular);
   }
 }
 
 // Cria a primeira congruência por padrão
 adicionaNovaCongruencia();
 
-function congruenciaValida(valor) {
-  return valor.match(padraoCongruencia);
-}
-
-
-
-// botaoTcr.onclick = () => {
-//   const valores = separaValoresTcr(inputTcr.value);
-
-//   const M = multiplicaLista(valores.map(a => a.mod));
-//   valores.forEach(a => {
-//     const n = calculaN(M, a.mod);
-//     a.c = a.numero;
-//     a.d = inversoModular(n, a.mod);
-//     a.n = n;
-//   });
-
-//   resultadoTcr.innerText = `Solução: ${resultadoSistema(valores.map(a => [a.c, a.d, a.n])) % M} (mod ${M})`
-// }
 
 
 

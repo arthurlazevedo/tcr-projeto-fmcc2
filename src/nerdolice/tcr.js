@@ -1,12 +1,13 @@
-import { coprimos, multiplicaLista } from './matematica.js'; 
+import { coprimos, multiplicaLista } from './matematica.js';
 
-export function sistemaTemSolucao(...mods) {
+export function sistemaTemSolucao(mods) {
+	const incorretos = [];
 	for (let i = 0; i < mods.length; i++) {
 		for (let j = i + 1; j < mods.length; j++) {
-			if (!coprimos(mods[i], mods[j])) return false;
+			if (!coprimos(mods[i], mods[j])) incorretos.push([i, j]);
 		}
 	}
-	return true;
+	return incorretos;
 }
 
 export function calculaN(M, m) {
