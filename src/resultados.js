@@ -1,7 +1,7 @@
-import { canonizaCongruencia } from "./nerdolice/congruencias.js";
+import { solCongruenciaLinear } from "./nerdolice/congruencias.js";
 import { multiplicaLista } from "./nerdolice/matematica.js";
 import { sistemaTemSolucao, sistemaCanonico } from "./nerdolice/tcr.js";
-import { representarSistema } from "./conversorMat.js";
+import { representarSistema, representarM } from "./conversorMat.js";
 
 const resultados = document.getElementById('resultados');
 
@@ -17,8 +17,10 @@ export function resolverSistema(sistema) {
     return incorretos;
   }
 
-  exibeSistema(sistema);
-  if (!sistemaCanonico(sistema)) sistema = canonizaSistema(sistema);
+  const ehCanonico = sistemaCanonico(sistema); 
+  exibeSistema(sistema, ehCanonico);
+  // todo: exibir sistema de novo
+  if (!ehCanonico) sistema = canonizaSistema(sistema);
   
   const M = calcularM(mods);
   separarCk(sistema);
@@ -43,14 +45,14 @@ function reportaErroSistema(incorretos) {
   resultados.appendChild(secaoErro);
 }
 
-function exibeSistema(sistema) {
+function exibeSistema(sistema, canonico) {
   const secaoTal = document.createElement('section');
     const tal     = document.createElement('p');
     tal.style     = 'margin:0;'
     tal.innerText = 'Resolver o seguinte sistema de congruências:';
 
     secaoTal.appendChild(tal);
-    secaoTal.appendChild(representarSistema(sistema));
+    secaoTal.appendChild(representarSistema(sistema, canonico));
   resultados.appendChild(secaoTal);
 }
 
@@ -61,14 +63,12 @@ function canonizaSistema(sistema) {
     tal.innerText = 'Primeiro, será necessário transformar todas as equações em sua forma canônica:';
 
     secaoTal.appendChild(tal);
-    const sistemaCanonico = sistema.map(({ a, c, m }) => ({ a: 1, c: canonizaCongruencia(a, c, m), m }));
-    secaoTal.appendChild(representarSistema(sistemaCanonico, true));
+    const sistemaCanonico = sistema.map(({ a, c, m }) => solCongruenciaLinear(a, c, m));
+    secaoTal.appendChild(representarSistema(sistema, sistemaCanonico));
   resultados.appendChild(secaoTal);
 
   return sistemaCanonico;
 }
-
-// torna congruências na forma canônica
 
 
 // calcular o M (módulo da solução final)
