@@ -35,7 +35,7 @@ btnCalcular.onclick = () => {
   
   const incorretos = resolverSistema(congruencias);
   if (incorretos) {
-    // todo
+    // TODO
   }
 }
 

@@ -21,8 +21,6 @@ export function calculaN(M, m) {
 
 export function resultadoSistema(cdn) {
 	return cdn.reduce((somatorio, atual) => {
-		const mult = multiplicaLista(atual);
-
-		return somatorio + mult;
+		return somatorio + multiplicaLista(atual);
 	}, 0);
 }
