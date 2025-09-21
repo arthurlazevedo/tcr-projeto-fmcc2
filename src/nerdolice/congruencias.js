@@ -14,6 +14,16 @@ export function inversoModular(a, mod) {
 }
 
 
+export function canonico(congruencia) {
+	return congruencia.a === 1;
+}
+
+
+export function canonizaCongruencia(a, c, m) {
+  return (c * inversoModular(a, m)) % m;
+}
+
+
 export function solCongruenciaLinear(a, b, mod) {
 	// normaliza
 	a = a % mod;

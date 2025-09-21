@@ -1,4 +1,5 @@
 import { coprimos, multiplicaLista } from './matematica.js';
+import { canonico } from './congruencias.js';
 
 export function sistemaTemSolucao(mods) {
 	const incorretos = [];
@@ -10,13 +11,15 @@ export function sistemaTemSolucao(mods) {
 	return incorretos;
 }
 
+export function sistemaCanonico(sistema) {
+	return sistema.every(canonico);
+}
+
 export function calculaN(M, m) {
 	return M/m;
 }
 
-// achar um nome melhor do q cdn né pelo amor
 export function resultadoSistema(cdn) {
-	// a lista estará no formato: (c, d, n)
 	return cdn.reduce((somatorio, atual) => {
 		const mult = multiplicaLista(atual);
 

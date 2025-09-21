@@ -30,7 +30,7 @@ btnCalcular.onclick = () => {
     const m = posm1 || posm2;
 
     // validar se a é 0, se for meter a pata no arrombado
-    congruencias.push({ a: a ?? 1, c, m });
+    congruencias.push({ a: a || 1, c, m });
   }
   
   const incorretos = resolverSistema(congruencias);

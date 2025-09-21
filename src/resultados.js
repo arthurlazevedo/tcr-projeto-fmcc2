@@ -1,6 +1,6 @@
-import { inversoModular } from "./nerdolice/congruencias.js";
+import { canonizaCongruencia } from "./nerdolice/congruencias.js";
 import { multiplicaLista } from "./nerdolice/matematica.js";
-import { sistemaTemSolucao } from "./nerdolice/tcr.js";
+import { sistemaTemSolucao, sistemaCanonico } from "./nerdolice/tcr.js";
 import { representarSistema } from "./conversorMat.js";
 
 const resultados = document.getElementById('resultados');
@@ -18,7 +18,7 @@ export function resolverSistema(sistema) {
   }
 
   exibeSistema(sistema);
-  canonizaSistema(sistema);
+  if (!sistemaCanonico(sistema)) sistema = canonizaSistema(sistema);
   
   const M = calcularM(mods);
   separarCk(sistema);
@@ -43,16 +43,48 @@ function reportaErroSistema(incorretos) {
   resultados.appendChild(secaoErro);
 }
 
-function canonizaSistema(sistema) {}
+function exibeSistema(sistema) {
+  const secaoTal = document.createElement('section');
+    const tal     = document.createElement('p');
+    tal.style     = 'margin:0;'
+    tal.innerText = 'Resolver o seguinte sistema de congruências:';
+
+    secaoTal.appendChild(tal);
+    secaoTal.appendChild(representarSistema(sistema));
+  resultados.appendChild(secaoTal);
+}
+
+function canonizaSistema(sistema) {
+  const secaoTal = document.createElement('section');
+    const tal     = document.createElement('p');
+    tal.style     = 'margin:0;'
+    tal.innerText = 'Primeiro, será necessário transformar todas as equações em sua forma canônica:';
+
+    secaoTal.appendChild(tal);
+    const sistemaCanonico = sistema.map(({ a, c, m }) => ({ a: 1, c: canonizaCongruencia(a, c, m), m }));
+    secaoTal.appendChild(representarSistema(sistemaCanonico, true));
+  resultados.appendChild(secaoTal);
+
+  return sistemaCanonico;
+}
 
 // torna congruências na forma canônica
-function canonizaCongruencia(a, c, m) {
-  return (c * inversoModular(a, m)) % m;
-}
+
 
 // calcular o M (módulo da solução final)
 function calcularM(mods) {
-  return multiplicaLista(mods);
+  const M = multiplicaLista(mods);
+  
+  const secaoTal = document.createElement('section');
+    const tal     = document.createElement('p');
+    tal.style     = 'margin:0;'
+    tal.innerText = '1) Calcular o módulo da solução final (M):';
+
+    secaoTal.appendChild(tal);
+    secaoTal.appendChild(representarM(mods, M));
+  resultados.appendChild(secaoTal);
+
+  return M;
 }
 
 // separar c (x = c (mod m))
