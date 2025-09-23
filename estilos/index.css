@@ -1,13 +1,93 @@
+:root {
+  --primaria : #66bb6a;
+  --aviso    : #ec332f;
+  --info     : #42a5f5;
+  --fundo    : white;
+}
+
+
+body {
+  margin: 0;
+}
+
+
 main {
-  display: flex;
-  flex-direction: row;
-  gap: 30px;
+  flex-direction : row;
+  display        : flex;
+  gap            : 30px;
 }
 
-main > section:first-child {
-  width: 45%;
+
+*:focus {
+  outline: 0;
 }
 
-main > section:last-child {
-  width: 55%;
+
+#menu {
+  background-color : rgb(198, 240, 240);
+  box-sizing       : border-box;
+  padding          : 5px;
+  height           : 100vh;
+  width            : 220px;
+}
+
+
+#resultados {
+  overflow-y : scroll;
+  flex-grow  : 1;
+  height     : 100vh;
+}
+
+
+input[type="text"] {
+  background-color : #fff;
+  border-radius    : 2px;
+  font-size        : 11px;
+  padding          : 1px;
+  border           : 1px solid #c0ccda;
+  height           : 19px;
+  color            : inherit;
+}
+
+
+input[type="text"]:focus {
+  box-shadow : inset 0 0 1.5px #bdc2c7;
+  border     : 1px solid #b7b8be;
+}
+
+
+button {
+  vertical-align : middle;
+  border-radius  : 2px;
+  font-weight    : bold;
+  padding        : 2.7px 8px;
+  border         : 0;
+  color          : white;
+}
+
+
+button#calcular {
+  background : var(--primaria);
+  position   : absolute;
+  padding    : 4px 7px;
+  bottom     : 5px;
+  border     : 0;
+  left       : 150px;
+}
+
+button.out {
+  background-color : inherit;
+  padding          : 2px 4px;
+}
+
+button.out-info {
+  color: var(--info);
+}
+
+button.out-warning {
+  color: var(--aviso);
+}
+
+.ml-2 {
+  margin-left: 2px;
 }

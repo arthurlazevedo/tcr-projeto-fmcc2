@@ -34,3 +34,13 @@ export function numeralParaRomano(numero) {
 function repete(string, quant) {
   return Array.from({ length: quant }).map(_ => string).join('');
 }
+
+
+export function ehNumero(param) {
+  return !isNaN(param);
+}
+
+
+export function ehNuloUndef(param) {
+  return param == null;
+}

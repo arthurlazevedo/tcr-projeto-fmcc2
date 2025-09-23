@@ -1,56 +1,56 @@
 import { totienteEuler, minimoDivComum, coprimos } from './matematica.js';
+import { explicacoes } from '../constantes.js';
 
 export function temSolucao(a, b, mod) {
-	return b % minimoDivComum(a, mod) === 0;
+  return b % minimoDivComum(a, mod) === 0;
 }
 
 
 export function inversoModular(a, mod) {
-	// não tem inverso, retorna um "erro"
-	if (!coprimos(a, mod)) return -1;
-	const expoente = totienteEuler(mod) - 1;
+  // não tem inverso, retorna um "erro"
+  if (!coprimos(a, mod)) return -1;
+  const expoente = totienteEuler(mod) - 1;
 
-	return (a**expoente) % mod;
+  return (a**expoente) % mod;
 }
 
 
 export function canonico(congruencia) {
-	return congruencia.a === 1;
+  return congruencia.a === 1;
 }
 
 
-export function solCongruenciaLinear(a, c, mod) {
-	const mdc = minimoDivComum(a, mod);
+export function solCongruenciaLinear(a, c, m) {
+  if (!temSolucao(a, c, m)) return -1;
 
-	// normaliza
-	a = a % mod;
-	c = c % mod;
+  if (a === 1) {
+    if (c < m) return { a, c, m, explicacao: explicacoes.canon };
 
-	if (a === 1) {
-		// TODO: talvez não esteja, isso tem que ser checado antes
-		return { a, c, m: mod, exp: 'Já está na forma canônica' }
-	}
+    return { a, c: c % m, m, explicacao: explicacoes.simples(m, c) };
+  }
 
-	if (a === c) {
-		if (mdc > 1) {
-			return { a: 1, c: 1, m: Math.floor(mod / mdc), exp: 'Pelo Algo de Euclides para Congruências' };
-		}
-		return { a: 1, c: 1, m: mod, exp: `Extraindo o fator em comum (${a})` };
-	}
+  const mdc = minimoDivComum(a, m);
+  if (a % m === c % m) {
+    if (mdc !== 1) return { a: 1, c: 1, m: Math.floor(m / mdc), explicacao: explicacoes.euclides };
+		if (a === c)   return { a: 1, c: 1, m, explicacao: explicacoes.comum(a) };
 
-	// não tem solução, retorna um código de erro
-	if (!temSolucao(a, c, mod)) return -1;
-	if (coprimos(a, mod)) {
-		const inverso = inversoModular(a, mod);
-		return { a: 1, c: (c * inverso) % mod, m: mod, exp: 'Pelo Inverso Modular' };
-	}
+		const resto = a % m;
+		return { a: resto || 1, c: resto, m, explicacao: explicacoes.simples(m, a, c), talvezNaoResolvido: resto === 1 || !resto };
 
-	a   = Math.floor(a / mdc);
-	c   = Math.floor(c / mdc);
-	mod = Math.floor(mod / mdc);
-	for (let i = 2; i < mod; i++) {
-		if ((a * i) % mod === c) {
-			return { a: 1, c: i, m: mod, exp: 'Pelo Alg. de Euclides para Congruências' };
-		}
-	}
+  }
+
+  if (coprimos(a, m)) {
+    const inverso = inversoModular(a, m);
+    return { a: 1, c: (c * inverso) % m, m, explicacao: explicacoes.inverso };
+  }
+
+  a = Math.floor(a / mdc);
+  c = Math.floor(c / mdc);
+  m = Math.floor(m / mdc);
+
+  for (let i = 2; i < m; i++) {
+    if ((a * i) % m === c) {
+      return { a: 1, c: i, m, explicacao: explicacoes.euclides };
+    }
+  }
 }

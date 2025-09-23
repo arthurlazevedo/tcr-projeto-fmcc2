@@ -12,7 +12,7 @@ document.onkeydown = e => {
 }
 
 const btnCalcular = document.getElementById('calcular');
-const sistemas    = document.getElementById('sistemas');
+const sistemas    = document.getElementById('menu');
 
 btnCalcular.onclick = () => {
   const congruencias = [];
@@ -33,6 +33,7 @@ btnCalcular.onclick = () => {
     congruencias.push({ a: a || 1, c, m });
   }
   
+  // TODO: checar se tem solução ou não
   const incorretos = resolverSistema(congruencias);
   if (incorretos) {
     // TODO
@@ -50,20 +51,20 @@ function adicionaNovaCongruencia(noAnterior) {
     const addCongruenciaBtn = document.createElement('button');
       addCongruenciaBtn.id        = `adicionar-congruencia-${numeroCongruencia}`;
       addCongruenciaBtn.title     = 'Adicionar Congruência ao Sistema';
-      addCongruenciaBtn.innerText = '➕';
-      addCongruenciaBtn.style     = 'margin-right:2px;';
+      addCongruenciaBtn.innerHTML = '<i class="fa fa-plus"></i>';
+      addCongruenciaBtn.className = 'out out-info ml-2';
       addCongruenciaBtn.onclick   = () => adicionaNovaCongruencia(congruenciaDiv);
 
     const rmCongruenciaBtn  = document.createElement('button');
       rmCongruenciaBtn.id        = `remover-congruencia-${numeroCongruencia}`;
       rmCongruenciaBtn.title     = 'Remover Congruência do Sistema';
-      rmCongruenciaBtn.innerText = '🗑️';
+      rmCongruenciaBtn.innerHTML = '<i class="fa fa-trash"></i>';
+      rmCongruenciaBtn.className = 'out out-warning ml-2';
       rmCongruenciaBtn.onclick   = () => sistemas.removeChild(congruenciaDiv);
 
     const congruenciaInput = document.createElement('input');
       congruenciaInput.id        = `valor-congruencia-${numeroCongruencia}`;
       congruenciaInput.type      = 'text';
-      congruenciaInput.style     = 'margin-right:2px;';
       congruenciaInput.onkeydown = e => {if (!e.ctrlKey && e.key === 'Enter') addCongruenciaBtn.click()};
 
     congruenciaDiv.appendChild(congruenciaInput);
@@ -80,57 +81,3 @@ function adicionaNovaCongruencia(noAnterior) {
 
 // Cria a primeira congruência por padrão
 adicionaNovaCongruencia();
-
-
-
-
-
-
-
-
-
-// imitador de "caret": https://codepen.io/ArtemGordinsky/pen/DgyQKy | https://stackoverflow.com/questions/61088821/draw-virtual-fake-carret-in-html-javascript-css
-// usar insertBefore para mover o "caret", referência: https://developer.mozilla.org/pt-BR/docs/Web/API/Node/insertBefore
-
-// const botaoCalcular = document.getElementById('calcular');
-// const inputInverso  = document.getElementById('inverso');
-// const resultado     = document.getElementById('resultado-inverso');
-
-// inputInverso.onbeforeinput = e => {
-//   const valor = e.target.dataset.value;
-
-//   switch (e.inputType) {
-//     case 'deleteContentBackward':
-//       inputInverso.dataset.value = valor.slice(0, valor.length - 2 || 0);
-//       break;
-//     case 'insertParagraph':
-//       // botaoAdicionar.click();
-//       break;
-//     case 'insertText':
-//       inputInverso.dataset.value += e.data;
-//       inputInverso.innerHTML = '<math><semantics><mrow><mrow>  <msup><mi>x</mi><mn>2</mn></msup>  <mo>+</mo>  <mrow>    <mn>4</mn><mo>&InvisibleTimes;</mo><mi>x</mi>  </mrow>  <mo>+</mo>  <mn>4</mn></mrow><mo>=</mo><mn>0</mn></mrow></semantics></math>'
-//       break;
-//     default:
-//       console.log(e.inputType);
-//   }
-// }
-
-// inputInverso.oninput = () => {
-//   const html = inputInverso.innerHTML;
-//   console.log(inputInverso.innerHTML);
-//   inputInverso.textContent = '';
-//   inputInverso.innerHTML = html;
-// }
-
-
-// botaoCalcular.onclick = () => {
-//   const valor = inputInverso.textContent;
-//   console.log(valor);
-//   const { numero, mod } = separaValores(valor);
-//   const inverso = inversoModular(numero, mod);
-//   if (inverso !== -1) {
-//     resultado.innerText = `O inverso de ${numero} (mod ${mod}) é ${inversoModular(numero, mod)}`;
-//   } else {
-//     resultado.innerText = 'O inverso não existe arrombado, eles não são coprimos';
-//   }
-// }

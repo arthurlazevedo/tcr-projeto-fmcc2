@@ -1,4 +1,4 @@
-import { numeralParaRomano } from "./utilitarios/utilitarios.js";
+import { ehNuloUndef, ehNumero, numeralParaRomano } from "./utilitarios/utilitarios.js";
 
 const mathNS = 'http://www.w3.org/1998/Math/MathML';
 
@@ -21,12 +21,8 @@ export function representarSistema(sistema, representacao) {
 
     const tabelaMat = criarElementoMath('mtable');
     for (let i = 0; i < sistema.length; i++) {
-      const repr = typeof representacao === 'object' ? representacao[i] : representacao;
-      tabelaMat.appendChild(gerarCongruencia(sistema[i], i + 1, repr))
-      if (repr.exp) {
-        // TODO: mais adequado separar isso em uma função específica
-        tabelaMat.insertAdjacentHTML('beforeend', `<mtr><mtd columnspan="99"><mtext mathcolor="red" class="explanation">[${repr.exp}]</mtext></mtd></mtr>`)
-      }
+      tabelaMat.appendChild(gerarCongruencia(sistema[i], i, { representacao }));
+      tabelaMat.appendChild(espacamento(2));
     }
   
   matematica.appendChild(tabelaMat);
@@ -37,18 +33,23 @@ export function representarSistema(sistema, representacao) {
 
 export function representarM(mods, M) {
   const matematica = criarParenteMath();
-  matematica.appendChild(resolucaoPassoPasso('M', mods.map(m => ({ m })), M, '&middot;'));
+  matematica.appendChild(resolucaoPassoPasso('M', mods.map(m => ({ m })), M, ['&middot;']));
 
   return matematica;
 }
 
-export function valorVariavel(valor, variavel, indice, mod) {
+export function valorVariavel(valor, { variavel, indice, mod } = {}) {
   const rowResolucao = criarElementoMath('mtr');
-    if (variavel && indice) rowResolucao.appendChild(posicaoCongruencia(indice));
-    if (!variavel && indice) rowResolucao.appendChild(criarCelulaSimples());
-    rowResolucao.appendChild(criarCelulaSimples(variavel, indice));
+
+    if (variavel && !ehNuloUndef(indice)) rowResolucao.appendChild(posicaoCongruencia(indice));
+    if (!variavel && !ehNuloUndef(indice)) rowResolucao.appendChild(criarCelulaSimples());
+
+    rowResolucao.appendChild(criarCelulaSimples(variavel, { indice }));
+
     rowResolucao.appendChild(criarCelulaSimples(mod ? '≡' : '='));
+
     rowResolucao.appendChild(typeof valor === 'object' ? valor : criarCelulaSimples(valor));
+
     if (mod) rowResolucao.appendChild(gerarMod(mod));
   return rowResolucao;
 }
@@ -56,43 +57,33 @@ export function valorVariavel(valor, variavel, indice, mod) {
 
 export function resolucaoPassoPasso(varResolver, valores, valorFinal, operacao, mod) {
   const tabela = criarElementoMath('mtable');
-    // TODO: se eu não conseguir fazer a parada de diferenciar se é uma ou várias equações, não precisa do último se o tamanho for 1
-    const rowInicial   = valorVariavel(comOperacao(valores, operacao, true), varResolver, null, mod);
-    const rowVariaveis = valorVariavel(comOperacao(valores, operacao, false), null, null, mod);
-    const rowResolucao = valorVariavel(valorFinal, null, null, mod);
-  
-  tabela.appendChild(rowInicial);
-  tabela.appendChild(rowVariaveis);
-  tabela.appendChild(rowResolucao);
-  
-  if (mod) tabela.appendChild(valorVariavel(valorFinal % mod, null, null, mod))
+
+  // TODO: se eu não conseguir fazer a parada de diferenciar se é uma ou várias equações, não precisa do último se o tamanho for 1
+  tabela.appendChild(valorVariavel(comOperacao(valores, operacao, true), { variavel: varResolver, mod }));
+  tabela.appendChild(valorVariavel(comOperacao(valores, operacao, false), { mod }));
+  tabela.appendChild(valorVariavel(valorFinal, { mod }));
+
+  if (mod) tabela.appendChild(valorVariavel(valorFinal % mod, { mod }));
 
   return tabela;
 }
 
 
-export function gerarCongruencia(congruencia, indice, representacao, nome, ignorar = false) {
+export function gerarCongruencia(congruencia, indice, { representacao, variavel, adicionaPos = true } = {}) {
   const linhaTabela = criarElementoMath('mtr');
-  if (indice) linhaTabela.appendChild(ignorar ? criarCelulaSimples() : posicaoCongruencia(indice));
+  if (!ehNuloUndef(indice)) linhaTabela.appendChild(adicionaPos ? posicaoCongruencia(indice): criarCelulaSimples());
 
-  linhaTabela.appendChild(gerarA(congruencia.a, nome, indice));
+  linhaTabela.appendChild(gerarA(congruencia.a, variavel, indice));
   linhaTabela.appendChild(criarCelulaSimples('≡'));
   linhaTabela.appendChild(criarCelulaSimples(congruencia.c));
   linhaTabela.appendChild(gerarMod(congruencia.m, indice));
 
   if (representacao) {
     linhaTabela.appendChild(criarCelulaSimples('&Rightarrow;'));
-    const cong = criarCelulaSimples('≡');
-    linhaTabela.appendChild(cong);
-    if (typeof representacao === 'object') {
-      linhaTabela.insertBefore(gerarA(representacao.a), cong);
-      linhaTabela.appendChild(criarCelulaSimples(representacao.c));
-      linhaTabela.appendChild(gerarMod(representacao.m));
-    } else {
-      linhaTabela.insertBefore(gerarA(), cong);
-      linhaTabela.appendChild(criarCelulaSimples('c', indice));
-      linhaTabela.appendChild(gerarMod('m', indice));
-    }
+    linhaTabela.appendChild(gerarA());
+    linhaTabela.appendChild(criarCelulaSimples('≡'));
+    linhaTabela.appendChild(criarCelulaSimples('c', { indice }));
+    linhaTabela.appendChild(gerarMod('m', indice));
   }
 
   return linhaTabela;
@@ -100,12 +91,14 @@ export function gerarCongruencia(congruencia, indice, representacao, nome, ignor
 
 
 export function fracaoSimples(numerador, denominador) {
-  denominador = [].concat(denominador);
-
+  const [valor, indice] = denominador;
   const fracao = criarElementoMath('mfrac');
-    const num = criarCelulaSimples(numerador).children.item(0);
-    const den = criarCelulaSimples(...denominador).children.item(0);
-    if (denominador.length > 1) den.style = 'margin-left:5px;';
+
+    const num = criarCelulaSimples(numerador, { comoCelula: false });
+    const den = criarCelulaSimples(valor, { indice, comoCelula: false });
+
+    // TODO: adicionar margem embaixo
+    if (denominador[1]) den.style = 'margin-left:5px;';
   
   fracao.appendChild(num);
   fracao.appendChild(den);
@@ -114,20 +107,41 @@ export function fracaoSimples(numerador, denominador) {
 }
 
 
+export function espacamento(tamanho) {
+  const espaco = criarElementoMath('mspace');
+  espaco.setAttribute('height', `${tamanho}px`);
+
+  return espaco;
+}
+
+
+export function explicacao(explicacao) {
+  const mtr = criarElementoMath('mtr');
+
+    const mtd = criarElementoMath('mtd');
+    mtd.setAttribute('columnspan', '99');
+
+      const exp = criarElementoMath('mtext');
+      exp.setAttribute('mathcolor', 'red');
+      exp.setAttribute('class', 'explanation');
+      exp.setAttribute('display', 'inline-block');
+      exp.innerHTML = `[${explicacao}]`;
+
+    mtd.appendChild(exp);
+  mtr.appendChild(mtd);
+
+  return mtr;
+}
+
+
 function posicaoCongruencia(indice) {
   const posCelula = criarElementoMath('mtd');
     const posLinha = criarElementoMath('mrow');
 
-      const abertura = criarElementoMath('mo');
-      abertura.textContent = '(';
-      
-      posLinha.appendChild(abertura);
-      posLinha.insertAdjacentHTML("beforeend", representarPalavraMi(numeralParaRomano(indice)));
+    posLinha.appendChild(operacao('('));
+    posLinha.insertAdjacentHTML("beforeend", representarPalavraMi(numeralParaRomano(indice + 1)));
+    posLinha.appendChild(operacao(')'));
 
-      const fechamento = criarElementoMath('mo');
-      fechamento.textContent = ')';
-
-    posLinha.appendChild(fechamento);
   posCelula.appendChild(posLinha);
 
   return posCelula;
@@ -139,8 +153,7 @@ function gerarA(valorA, variavel, indice) {
     const linha = criarElementoMath('mrow');
 
     if (valorA && valorA !== 1) {
-      const a = criarCelulaSimples(valorA, indice).children.item(0);
-
+      const a = criarCelulaSimples(valorA, { indice, comoCelula: false });
       const vezes = operacao('&#x2062;');
 
       linha.appendChild(a);
@@ -148,10 +161,9 @@ function gerarA(valorA, variavel, indice) {
     }
 
     if (variavel) {
-      // TODO: achar um jeito melhor do que só ter que fazer isso sempre
-      linha.appendChild(criarCelulaSimples(variavel, indice).children.item(0))
+      linha.appendChild(criarCelulaSimples(variavel, { indice, comoCelula: false }))
     } else {
-      linha.appendChild(criarCelulaSimples('x').children.item(0));
+      linha.appendChild(criarCelulaSimples('x', { comoCelula: false }));
     }
 
   celula.appendChild(linha);
@@ -164,47 +176,37 @@ function gerarMod(modulo, indice) {
   const modCelula = criarElementoMath('mtd');
     const modLinha = criarElementoMath('mrow');
 
-      const inicio = criarElementoMath('mo');
-      inicio.textContent = '(';
+      modLinha.appendChild(operacao('('));
   
       const funcaoMod = criarElementoMath('mrow');
       funcaoMod.insertAdjacentHTML('beforeend', representarPalavraMi('mod'));
-      funcaoMod.style = 'margin-right:3px;'
+      funcaoMod.style = 'margin-right:5px;'
 
-      modLinha.appendChild(inicio);
       modLinha.appendChild(funcaoMod);
+      modLinha.appendChild(criarCelulaSimples(modulo, { indice, comoCelula: false }));
+      modLinha.appendChild(operacao(')'));
 
-      if (isNaN(indice) || !isNaN(modulo)) {
-        const mod = criarElementoMath('mn');
-        mod.textContent = modulo;
-
-        modLinha.appendChild(mod);
-      } else {
-        modLinha.appendChild(variavelIndexada(modulo, indice));
-      }
-
-      const fim = criarElementoMath('mo');
-      fim.textContent = ')';
-
-
-    modLinha.appendChild(fim);
   modCelula.appendChild(modLinha);
 
   return modCelula;
 }
 
 
-function criarCelulaSimples(elemento, indice) {
+function criarCelulaSimples(elemento, { indice, comoCelula = true } = {}) {
   const celula = criarElementoMath('mtd');
 
-  if (elemento) {
-    if (!isNaN(elemento) || (isNaN(indice) && isNaN(elemento))) {
-      const c = criarElementoMath(isNaN(elemento) ? 'mo': 'mn');
+  if (!ehNuloUndef(elemento)) {
+    if (ehNumero(elemento) || ehNuloUndef(indice)) {
+      const c = criarElementoMath(ehNumero(elemento) ? 'mn' : 'mi');
       c.innerHTML = elemento;
-  
+
+      if (!comoCelula) return c;
       celula.appendChild(c);
     } else {
-      celula.appendChild(variavelIndexada(elemento, indice));
+      const c = variavelIndexada(elemento, indice);
+
+      if (!comoCelula) return c;
+      celula.appendChild(c);
     }
   }
 
@@ -215,14 +217,8 @@ function criarCelulaSimples(elemento, indice) {
 function variavelIndexada(nome, indice) {
   const linha = criarElementoMath('msub');
 
-    const variavel      = criarElementoMath('mi');
-    variavel.innerHTML  = nome;
-
-    const indiceVar     = criarElementoMath('mn');
-    indiceVar.innerHTML = indice
-  
-  linha.appendChild(variavel);
-  linha.appendChild(indiceVar);
+  linha.appendChild(criarCelulaSimples(nome, { comoCelula: false }));
+  linha.appendChild(criarCelulaSimples(indice + 1, { comoCelula: false }));
 
   return linha
 }
@@ -231,22 +227,22 @@ function variavelIndexada(nome, indice) {
 function comOperacao(valores, valOperacao, usarChave) {
   const row = criarElementoMath('mtd');
 
-  valores.forEach((val, idx) => {
+  valores.forEach((val, indice) => {
     const entries = Object.entries(val);
     entries.forEach(([chave, valor], idxInterno) => {
       if (usarChave) {
-        row.appendChild(criarCelulaSimples(chave, idx + 1).children.item(0));
+        row.appendChild(criarCelulaSimples(chave, { indice, comoCelula: false }));
       } else {
-        row.appendChild(criarCelulaSimples(valor).children.item(0));
+        row.appendChild(criarCelulaSimples(valor, { comoCelula: false }));
       }
       if (idxInterno !== entries.length - 1) {
-        const operacaoMo = operacao(Array.isArray(valOperacao) ? valOperacao[0] : valOperacao);
+        const operacaoMo = operacao(valOperacao[1]);
         if (usarChave) operacaoMo.style = 'margin-right:2px;'
         row.appendChild(operacaoMo);
       }
     })
-    if (idx !== valores.length - 1) {
-      const operacaoMo = operacao(Array.isArray(valOperacao) ? valOperacao[1] : valOperacao);
+    if (indice !== valores.length - 1) {
+      const operacaoMo = operacao(valOperacao[0]);
       if (usarChave) operacaoMo.style = 'margin-right:2px;'
       row.appendChild(operacaoMo);
     }
