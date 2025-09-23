@@ -1,5 +1,7 @@
 TCR para Web
 
+[Link para o GitHubPages](https://arthurlazevedo.github.io/tcr-projeto-fmcc2/)
+
 ## Rodar facilmente
 
 ```shell
