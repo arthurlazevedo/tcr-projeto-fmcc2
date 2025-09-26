@@ -1,13 +1,10 @@
 import { resolverSistema } from "./resultados.js";
-
-const padraoCongruencia = /(\d*)x\s*=\s*(\d+)\s*(?:%\s*(\d+)|\(mod\s*(\d+)\))/;
+import { ehNumero } from "./utilitarios/utilitarios.js";
 
 document.onkeydown = e => {
   if (e.ctrlKey && e.key === 'Enter') {
+    if (!btnCalcular.disabled) btnCalcular.click();
     e.stopPropagation();
-    if (!btnCalcular.disabled) {
-      btnCalcular.click();
-    }
   }
 }
 
@@ -18,18 +15,11 @@ btnCalcular.onclick = () => {
   const congruencias = [];
 
   for (const congruencia of sistemas.children) {
-    if (congruencia.localName === 'button') break;
-    const valor = congruencia.children.item(0).value;
+    const [a, c, m] = Array.from(congruencia.querySelectorAll('input')).map(input => input.value);
 
-    if (!valor.match(padraoCongruencia)) {
-      // resultado.innerText = 'Algo de errado não está certo em uma dessas congruências aí prc';
-      return;
-    }
-    
-    const [, a, c, posm1, posm2] = padraoCongruencia.exec(valor);
-    const m = posm1 || posm2;
+    if (!c || !m) break;
 
-    // validar se a é 0, se for meter a pata no arrombado
+    // TODO: validar se a é 0, se for meter a pata no arrombado
     congruencias.push({ a: a || 1, c, m });
   }
   
@@ -40,42 +30,146 @@ btnCalcular.onclick = () => {
   }
 }
 
+function atalhosTecladoCongruencia(e) {
+  // TODO: confirmar se não vai ter problemas assim
+  const congruencia   = e.target.parentElement;
+  const proximoNo     = congruencia.nextElementSibling;
+  const noAnterior    = congruencia.previousElementSibling;
+  const rmCongruencia = congruencia.querySelector('.lixeira');
+
+  switch (e.key) {
+    case 'Enter':
+      if (!e.ctrlKey) {
+        adicionaNovaCongruencia(congruencia);
+        e.stopPropagation();
+      }
+      break;
+    case 'Backspace':
+      if (e.shiftKey && noAnterior) {
+        rmCongruencia.click();
+        noAnterior.focus();
+        e.stopPropagation();
+      }
+      break;
+    case 'Delete':
+      if (noAnterior) {
+        rmCongruencia.click();
+        noAnterior.focus();
+        e.stopPropagation();
+      }
+      break;
+    case 'ArrowUp':
+      if (noAnterior) {
+        noAnterior.focus();
+        e.stopPropagation();
+      }
+      break;
+    case 'ArrowDown':
+      // TODO: ter uma parte mais interna para os sistemas
+      if (proximoNo.className === 'congruencia') {
+          proximoNo.focus();
+      } else {
+        adicionaNovaCongruencia(congruencia);
+      }
+      e.stopPropagation();
+      break;
+  }
+}
+
 function adicionaNovaCongruencia(noAnterior) {
   const numeroCongruencia = sistemas.children.length;
 
-  const congruenciaDiv      = document.createElement('div');
-    congruenciaDiv.id    = `congruencia-linear-${numeroCongruencia}`;
-    congruenciaDiv.style = 'margin-bottom:5px;';
-    // congruenciaDiv.classList.add('...');
+  const congruenciaDiv = document.createElement('div');
+    congruenciaDiv.id        = `congruencia-linear-${numeroCongruencia}`;
+    congruenciaDiv.tabIndex  = -1;
+    congruenciaDiv.className = 'congruencia';
+    congruenciaDiv.onkeydown = atalhosTecladoCongruencia;
+    congruenciaDiv.onfocus   = e => (console.log(e), a.focus());
 
-    const addCongruenciaBtn = document.createElement('button');
-      addCongruenciaBtn.id        = `adicionar-congruencia-${numeroCongruencia}`;
-      addCongruenciaBtn.title     = 'Adicionar Congruência ao Sistema';
-      addCongruenciaBtn.innerHTML = '<i class="fa fa-plus"></i>';
-      addCongruenciaBtn.className = 'out out-info ml-2';
-      addCongruenciaBtn.onclick   = () => adicionaNovaCongruencia(congruenciaDiv);
+    const erroCongruencia = document.createElement('div');
+      erroCongruencia.id         = `erro-congruencia-${numeroCongruencia}`;  
+      erroCongruencia.className  = 'relatorio-erro';
+      erroCongruencia.dataset.id = numeroCongruencia;
+    
+    const a   = criaInputCongruencia('a', numeroCongruencia, 'x');
+    const x   = criaElementoSimples('i', 'x');
+    const eq  = criaElementoSimples('span', ' ≡ ');
+    const c   = criaInputCongruencia('c', numeroCongruencia, '(');
+    const mod = criaElementoSimples('i', '(mod ');
+    const m   = criaInputCongruencia('m', numeroCongruencia);
+    const fim = criaElementoSimples('i', ')');
 
-    const rmCongruenciaBtn  = document.createElement('button');
-      rmCongruenciaBtn.id        = `remover-congruencia-${numeroCongruencia}`;
-      rmCongruenciaBtn.title     = 'Remover Congruência do Sistema';
-      rmCongruenciaBtn.innerHTML = '<i class="fa fa-trash"></i>';
-      rmCongruenciaBtn.className = 'out out-warning ml-2';
-      rmCongruenciaBtn.onclick   = () => sistemas.removeChild(congruenciaDiv);
+    const rmCongruencia  = document.createElement('i');
+      rmCongruencia.id        = `remover-congruencia-${numeroCongruencia}`;
+      rmCongruencia.className = 'fa fa-trash fa-sm lixeira';
+      rmCongruencia.title     = 'Remover Congruência do Sistema';
+      rmCongruencia.onclick   = () => sistemas.removeChild(congruenciaDiv);
 
-    const congruenciaInput = document.createElement('input');
-      congruenciaInput.id        = `valor-congruencia-${numeroCongruencia}`;
-      congruenciaInput.type      = 'text';
-      congruenciaInput.onkeydown = e => {if (!e.ctrlKey && e.key === 'Enter') addCongruenciaBtn.click()};
-
-    congruenciaDiv.appendChild(congruenciaInput);
-    congruenciaDiv.appendChild(addCongruenciaBtn);
-    congruenciaDiv.appendChild(rmCongruenciaBtn);
+    congruenciaDiv.appendChild(erroCongruencia);
+    congruenciaDiv.appendChild(a);
+    congruenciaDiv.appendChild(x);
+    congruenciaDiv.appendChild(eq);
+    congruenciaDiv.appendChild(c);
+    congruenciaDiv.appendChild(mod);
+    congruenciaDiv.appendChild(m);
+    congruenciaDiv.appendChild(fim);
+    congruenciaDiv.appendChild(rmCongruencia);
 
   if (noAnterior) {
-    sistemas.insertBefore(congruenciaDiv, noAnterior.nextSibling);
-    congruenciaInput.focus();
+    sistemas.insertBefore(congruenciaDiv, noAnterior.nextElementSibling);
+    a.focus();
   } else {
     sistemas.insertBefore(congruenciaDiv, btnCalcular);
+  }
+}
+
+
+function criaElementoSimples(elemento, conteudo) {
+  const el = document.createElement(elemento);
+    el.innerText = conteudo;
+
+  return el;
+}
+
+
+function criaInputCongruencia(nome, indice, teclaProximo) {
+  const input = document.createElement('input');
+    input.id            = `${nome}-${indice}`;
+    input.type          = 'text';
+    input.onkeydown     = e => focaProximoInput(e, teclaProximo);
+    input.placeholder   = nome;
+    input.onbeforeinput = adaptaInput;
+
+  return input;
+}
+
+
+function focaProximoInput(e, teclaProximo) {
+  if (e.key.toUpperCase() === teclaProximo?.toUpperCase()) {
+    const inputs = e.target.parentElement.querySelectorAll('input');
+    for (let i = 0; i < inputs.length; i++) {
+      if (inputs[i] === e.target) {
+        inputs[i + 1].focus();
+      }
+    }
+  }
+}
+
+function adaptaInput(e) {
+  if (!ehNumero(e.data)) {
+    e.preventDefault();
+    return;
+  }
+
+  const input = e.target;
+  let quantNums = input.value.length;
+
+  if (e.inputType === 'deleteContentBackward') quantNums = Math.max(quantNums - 2, 0);
+
+  if (!quantNums || e.inputType === 'deleteWordBackward') {
+    input.style.width = '21px';
+  } else if (quantNums < 5) {
+    input.style.width = (quantNums + 1) * 13 + 'px';
   }
 }
 

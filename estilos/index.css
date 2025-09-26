@@ -1,13 +1,14 @@
 :root {
   --primaria : #66bb6a;
-  --aviso    : #ec332f;
-  --info     : #42a5f5;
+  --aviso    : #ee4643;
   --fundo    : white;
+  --info     : #42a5f5;
 }
 
 
 body {
   margin: 0;
+  font-size: 1.8rem;
 }
 
 
@@ -24,16 +25,16 @@ main {
 
 
 #menu {
-  background-color : rgb(198, 240, 240);
-  box-sizing       : border-box;
-  padding          : 5px;
-  height           : 100vh;
-  width            : 220px;
+  border-right : 1px solid rgb(219, 219, 219);;
+  box-sizing   : border-box;
+  position     : relative;
+  height       : 100vh;
+  width        : 400px;
 }
 
 
 #resultados {
-  overflow-y : scroll;
+  overflow-y : auto;
   flex-grow  : 1;
   height     : 100vh;
 }
@@ -41,38 +42,52 @@ main {
 
 input[type="text"] {
   background-color : #fff;
-  border-radius    : 2px;
-  font-size        : 11px;
-  padding          : 1px;
-  border           : 1px solid #c0ccda;
-  height           : 19px;
+  padding-bottom   : 2px !important;
+  vertical-align   : middle;
+  margin-right     : 4px;
+  font-family      : 'Times new Roman';
+  font-size        : inherit;
+  position         : relative;
+  padding          : 0;
+  border           : none;
+  bottom           : 2px;
   color            : inherit;
+  width            : 21px;
+  text-align       : end;
 }
 
 
-input[type="text"]:focus {
-  box-shadow : inset 0 0 1.5px #bdc2c7;
-  border     : 1px solid #b7b8be;
+input::placeholder {
+  color: rgb(136, 136, 136);
+}
+
+
+input.direito::placeholder {
+  vertical-align : middle;
+  margin-right   : 1px;
+  text-align     : end;
 }
 
 
 button {
-  vertical-align : middle;
-  border-radius  : 2px;
-  font-weight    : bold;
-  padding        : 2.7px 8px;
-  border         : 0;
-  color          : white;
+  border-radius : 2px;
+  font-weight   : bold;
+  padding       : 2.7px 8px;
+  border        : 0;
+  color         : white;
 }
 
 
 button#calcular {
   background : var(--primaria);
+  font-size  : 1.5rem;
   position   : absolute;
   padding    : 4px 7px;
   bottom     : 5px;
   border     : 0;
-  left       : 150px;
+  width      : 150px;
+  height     : 40px;
+  right      : 10px;
 }
 
 button.out {
@@ -90,4 +105,65 @@ button.out-warning {
 
 .ml-2 {
   margin-left: 2px;
+}
+
+.lixeira {
+  font-size : 18px !important;
+  position  : absolute;
+  cursor    : pointer;
+  color     : var(--aviso);
+  right     : 3px;
+  top       : 3px;
+}
+
+.lixeira:hover {
+  filter: brightness(92%);
+}
+
+.congruencia {
+  box-sizing : border-box;
+  background : #fff;
+  position   : relative;
+  border     : 1px solid #c0ccda;
+  height     : 50px;
+  width      : calc(100% + 1px);
+}
+
+.congruencia:focus-within {
+  border: 1px solid rgb(90, 149, 200);
+}
+
+.congruencia > * {
+  vertical-align: middle;
+}
+
+.congruencia > i:not(.lixeira) {
+  position : relative;
+  bottom   : 3px;
+}
+
+.congruencia:focus-within > .relatorio-erro {
+  background: rgb(120, 172, 218);
+}
+
+.congruencia:focus-within > .relatorio-erro::before {
+  color: white;
+}
+
+.relatorio-erro {
+  background-color : rgba(90, 149, 200, 0.353);
+  margin-right     : 5px;
+  display          : inline-flex;
+  height           : 100%;
+  width            : 12%;
+  top              : 0;
+}
+
+.relatorio-erro::before {
+  font-family : inherit;
+  font-weight : bold;
+  font-size   : 16px;
+  content     : attr(data-id);
+  margin      : 2px 0 0 3px;
+  color       : rgb(67, 74, 81);
 }
