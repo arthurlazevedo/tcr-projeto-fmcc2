@@ -94,7 +94,7 @@ function atalhosTecladoCongruencia(e) {
       break;
 
     case 'Backspace':
-      if (e.shiftKey && noAnterior) {
+      if (e.shiftKey && (noAnterior || proximoNo)) {
         rmCongruencia.click();
         e.stopPropagation();
         e.preventDefault();
@@ -102,7 +102,7 @@ function atalhosTecladoCongruencia(e) {
       break;
 
     case 'Delete':
-      if (noAnterior) {
+      if (noAnterior || proximoNo) {
         rmCongruencia.click();
         e.stopPropagation();
         e.preventDefault();
@@ -150,14 +150,18 @@ function adicionaNovaCongruencia(noAnterior) {
       rmCongruencia.className = 'fa fa-trash fa-sm lixeira';
       rmCongruencia.title     = 'Remover Congruência do Sistema';
       rmCongruencia.onclick   = () => {
-        if (congruenciaDiv.previousElementSibling) {
-          const noAnterior = congruenciaDiv.previousElementSibling;
-          sistemas.removeChild(congruenciaDiv);
-
+        const noAnterior = congruenciaDiv.previousElementSibling;
+        const proximoNo = congruenciaDiv.nextElementSibling;
+        
+        if (noAnterior || proximoNo) {
           if (noAnterior) {
             ajustaIndice(noAnterior, '-');
             noAnterior.click();
+          } else if (proximoNo) {
+            ajustaIndice(congruenciaDiv, '-');
+            proximoNo.click();
           }
+          sistemas.removeChild(congruenciaDiv);
         }
       }
 
