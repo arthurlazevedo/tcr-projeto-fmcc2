@@ -2,29 +2,28 @@ import { inversoModular, solCongruenciaLinear } from "./nerdolice/congruencias.j
 import { multiplicaLista } from "./nerdolice/matematica.js";
 import { sistemaTemSolucao, sistemaCanonico, calculaN, resultadoSistema } from "./nerdolice/tcr.js";
 import { representarSistema, representarM, valorVariavel, criarParenteMath, criarElementoMath, fracaoSimples, gerarCongruencia, resolucaoPassoPasso, explicacao, espacamento } from "./conversorMat.js";
+import { numeralParaRomano } from "./utilitarios/utilitarios.js";
 
-const resultados = document.getElementById('resultados');
+const canonizar  = document.getElementById('canonizar');
+const resultados = document.getElementById('passo-a-passo');
 
 export function resolverSistema(sistema) {
-  resultados.replaceChildren();
-  
+  resetaResultados();
+
   let mods         = sistema.map(congruencia => congruencia.m);
   const incorretos = sistemaTemSolucao(mods);
 
   if (incorretos.length !== 0) {
-    reportaErroSistema(incorretos.map(([i, j]) => [sistema[i], sistema[j]]));
-    return incorretos;
+    reportaErroSistema(sistema, incorretos);
+    return;
   }
 
-  const ehCanonico = sistemaCanonico(sistema); 
-  exibeSistema(sistema, ehCanonico);
-  // TODO: exibir sistema de novo
-  if (!ehCanonico) {
+  if (!sistemaCanonico(sistema)) {  
     sistema = canonizaSistema(sistema);
-    mods = sistema.map(congruencia => congruencia.m);
+    mods    = sistema.map(congruencia => congruencia.m);
   }
-  
-  // TODO: considerar se for só uma congruência também, não precisaria de tudo isso
+  exibeSistema(sistema, true);
+
   const M = calcularM(mods);
   separarCk(sistema);
   calcularNk(sistema, M);
@@ -32,41 +31,54 @@ export function resolverSistema(sistema) {
   resultadoFinal(sistema, M);
 }
 
-function reportaErroSistema(incorretos) {
+function reportaErroSistema(sistema, incorretos) {
   const secaoErro = document.createElement('section');
     const erro     = document.createElement('p');
     erro.style     = 'margin:0;'
-    erro.innerText = 'As seguintes congruências possuem mod\'s não-coprimos:';
-      
+    erro.innerText = 'O sistema:';
+
     secaoErro.appendChild(erro);
-    incorretos.forEach(congruencias => {
-      const incorreto = representarSistema(congruencias);
-      incorreto.style = 'margin-bottom:8px;';
-      secaoErro.appendChild(incorreto);
-    });
+    secaoErro.appendChild(representarSistema(sistema));
+
+    const explicacao = document.createElement('p');
+    explicacao.style = 'margin:0;text-align:center'
+    explicacao.innerHTML = `Não possui solução, visto que as congruências:<ul class="lista-nao-coprimos">${incorretos.map(congs => {
+      return `<li>${congs.map(cong => `<i>(${numeralParaRomano(cong + 1)})</i>`).join(' e ')}</li>`
+    }).join('')}</ul>Possuem mod's não-coprimos`
+
+    secaoErro.appendChild(explicacao);
 
   resultados.appendChild(secaoErro);
 }
 
-function exibeSistema(sistema, canonico) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerText = 'Resolver o seguinte sistema de congruências:';
+function exibeSistema(sistema) {
+  const secaoSistema = document.createElement('section');
+    const tituloSistema = criarTitulo('Resolver o seguinte sistema de congruências utilizando o TCR');
 
-    secaoTal.appendChild(tal);
-    secaoTal.appendChild(representarSistema(sistema, canonico));
-  resultados.appendChild(secaoTal);
+    secaoSistema.appendChild(tituloSistema);
+    secaoSistema.appendChild(representarSistema(sistema, true));
+  resultados.appendChild(secaoSistema);
 }
 
 
 function canonizaSistema(sistema) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:3px;margin-left:0;'
-    tal.innerText = 'Primeiro, será necessário transformar todas as equações em sua forma canônica:';
+  canonizar.classList.add('display');
 
-    secaoTal.appendChild(tal);
+  const secaoCanonizar = document.createElement('section');
+    const tituloSistema = criarTitulo('Dado o seguinte sistema de congruência');
+    const reprSistema = representarSistema(sistema);
+
+    secaoCanonizar.appendChild(tituloSistema);
+    secaoCanonizar.appendChild(reprSistema);
+
+    const explicacaoCanonizar = document.createElement('span');
+      explicacaoCanonizar.className = 'explicacao';
+      explicacaoCanonizar.innerHTML = 'Devemos transformar todas as congruências em sua forma canonizada (<i>x</i> ≡ <i>n mod m, n</i> ∈ ℤ)<br>';
+
+    const tituloCanonizar = criarTitulo('Canonizando as congruências');
+
+    secaoCanonizar.appendChild(explicacaoCanonizar);
+    secaoCanonizar.appendChild(tituloCanonizar);
     const matematica = criarParenteMath();
     const mtable = criarElementoMath('mtable');
     const sistemaCanonico = sistema.map(({ a, c, m }) => solCongruenciaLinear(a, c, m));
@@ -75,40 +87,38 @@ function canonizaSistema(sistema) {
       mtable.appendChild(gerarCongruencia(sistema[i], i));
       mtable.appendChild(explicacao(sistemaCanonico[i].explicacao));
       mtable.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
-      mtable.appendChild(espacamento(10));
+      mtable.appendChild(espacamento(15));
     }
     matematica.appendChild(mtable);
-    secaoTal.appendChild(matematica);
-  resultados.appendChild(secaoTal);
+    secaoCanonizar.appendChild(matematica);
+  canonizar.appendChild(secaoCanonizar);
 
   return sistemaCanonico;
 }
 
 
-// calcular o M (módulo da solução final)
 function calcularM(mods) {
   const M = multiplicaLista(mods);
   
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerHTML = '1) Calcular o módulo da solução final (<i>M</i>):';
+  const secaoM = document.createElement('section');
+    const tituloM = criarTitulo('Passo 1.', 'margem-acima');
+    const descM   = criarDescricao('Calcular o módulo da solução final (<i>M</i>)');
 
-    secaoTal.appendChild(tal);
-    secaoTal.appendChild(representarM(mods, M));
-  resultados.appendChild(secaoTal);
+    secaoM.appendChild(tituloM);
+    secaoM.appendChild(descM);
+    secaoM.appendChild(representarM(mods, M));
+  resultados.appendChild(secaoM);
 
   return M;
 }
 
-// separar c (x = c (mod m))
 function separarCk(sistema) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerHTML = '2) Separar os <i>c</i><sub>k</sub><i>\'s</i> de cada Congruência:';
+  const secaoC = document.createElement('section');
+    const tituloC = criarTitulo('Passo 2.', 'margem-acima');
+    const descC   = criarDescricao('Separar os <i>c</i><sub>k</sub><i>\'s</i> de cada Congruência');
 
-    secaoTal.appendChild(tal);
+    secaoC.appendChild(tituloC);
+    secaoC.appendChild(descC);
     const matematica = criarParenteMath();
 
       const tabela     = criarElementoMath('mtable');
@@ -116,22 +126,21 @@ function separarCk(sistema) {
         tabela.appendChild(valorVariavel(c, { variavel: 'c', indice}));
       })
       matematica.appendChild(tabela);
-    
-    secaoTal.appendChild(matematica);
-  resultados.appendChild(secaoTal);
+  
+    secaoC.appendChild(matematica);
+  resultados.appendChild(secaoC);
 }
 
-// calcular razão M/m (N)
 function calcularNk(sistema, M) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerHTML = '3) Calcular a razão  <sup><i>M</i></sup>&frasl;<sub><i>m</i><sub>k</sub></sub>  (<i>N</i><sub>k</sub>) de cada Congruência:';
+  const secaoN = document.createElement('section');
+    const tituloN     = criarTitulo('Passo 3.', 'margem-acima');
+    const descricaoN = criarDescricao('Calcular a razão  <sup><i>M</i></sup>&frasl;<sub><i>m</i><sub>k</sub></sub> (<i>N</i><sub>k</sub>) de cada Congruência');
 
-    secaoTal.appendChild(tal);
+    secaoN.appendChild(tituloN);
+    secaoN.appendChild(descricaoN);
     const matematica = criarParenteMath();
 
-      const tabela     = criarElementoMath('mtable');
+      const tabela = criarElementoMath('mtable');
       sistema.forEach((congruencia, indice) => {
         congruencia.N = calculaN(M, congruencia.m);
 
@@ -143,24 +152,22 @@ function calcularNk(sistema, M) {
         tabela.appendChild(espacamento(5));
       })
       matematica.appendChild(tabela);
-    
-    secaoTal.appendChild(matematica);
-  resultados.appendChild(secaoTal);
+  
+    secaoN.appendChild(matematica);
+  resultados.appendChild(secaoN);
 }
 
-// calcular inverso de N mod m (d)
 function calcularDk(sistema) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerHTML = '4) Calcular <i>d</i><sub>k</sub>, o inverso de <i>N</i><sub>k</sub> <i>mod</i> <i>m</i><sub>k</sub>';
+  const secaoD = document.createElement('section');
+    const tituloD = criarTitulo('Passo 4.', 'margem-acima');
+    const descD   = criarDescricao('Calcular <i>d</i><sub>k</sub>, o inverso de <i>N</i><sub>k</sub> <i>mod m</i><sub>k</sub>');
 
-    secaoTal.appendChild(tal);
+    secaoD.appendChild(tituloD);
+    secaoD.appendChild(descD);
     const matematica = criarParenteMath();
       const mtable = criarElementoMath('mtable');
       sistema.forEach((congruencia, idx) => {
         const d = inversoModular(congruencia.N, congruencia.m);
-        console.log(d);
         congruencia.d = d;
         mtable.appendChild(gerarCongruencia({ a: 'N', c: 1, m: 'm' }, idx, { variavel: 'd' }));
         mtable.appendChild(gerarCongruencia({ a: congruencia.N, c: 1, m: congruencia.m }, idx, { variavel: 'd', adicionaPos: false }));
@@ -169,27 +176,50 @@ function calcularDk(sistema) {
         mtable.appendChild(espacamento(5));
       });
     matematica.appendChild(mtable);
-    secaoTal.appendChild(matematica);
-  resultados.appendChild(secaoTal);
+    secaoD.appendChild(matematica);
+  resultados.appendChild(secaoD);
 }
 
-// calcular resultado final (mod M)
 function resultadoFinal(sistema, M) {
-  const secaoTal = document.createElement('section');
-    const tal     = document.createElement('p');
-    tal.style     = 'margin:0;'
-    tal.innerHTML = '5) Calcular o resultado final (<i>mod</i> <i>M</i>)';
+  const secaoResultado = document.createElement('section');
+    const resultado = criarTitulo('Passo 5.', 'margem-acima');
+    const descRes   = criarDescricao('Calcular o resultado final (<i>mod M</i>)')
 
-    secaoTal.appendChild(tal);
+    secaoResultado.appendChild(resultado);
+    secaoResultado.appendChild(descRes);
     const matematica = criarParenteMath();
-    const sistemaNecessario = sistema.map(({ c, d, N }) => ({ c, d, N }));
+      const sistemaNecessario = sistema.map(({ c, d, N }) => ({ c, d, N }));
 
-    const resultadoFinal = resultadoSistema(sistema.map(({ c, d, N }) => [c, d, N]));
+      const resultadoFinal = resultadoSistema(sistema.map(({ c, d, N }) => [c, d, N]));
     
-    const mtable = criarElementoMath('mtable');
-    const resolucao = resolucaoPassoPasso('x', sistemaNecessario, resultadoFinal, ['+', '&middot;'], M);  
-    mtable.appendChild(resolucao);
+      const mtable = criarElementoMath('mtable');
+      const resolucao = resolucaoPassoPasso('x', sistemaNecessario, resultadoFinal, ['+', '&middot;'], M);  
+
+      mtable.appendChild(resolucao);
+
     matematica.appendChild(mtable);
-    secaoTal.appendChild(matematica);
-  resultados.appendChild(secaoTal);
+    secaoResultado.appendChild(matematica);
+  resultados.appendChild(secaoResultado);
+}
+
+function criarTitulo(titulo, classesExtras) {
+  const tituloSpan = document.createElement('span');
+    tituloSpan.className = `titulo-secao ${classesExtras}`;
+    tituloSpan.innerHTML = titulo;
+
+  return tituloSpan;
+}
+
+function criarDescricao(desc) {
+  const descricao = document.createElement('span');
+    descricao.className = 'descricao-secao'
+    descricao.innerHTML = desc;
+  
+  return descricao;
+}
+
+function resetaResultados() {
+  resultados.replaceChildren();
+  canonizar.replaceChildren();
+  canonizar.classList.remove('display');
 }

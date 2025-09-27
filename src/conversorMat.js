@@ -4,7 +4,7 @@ const mathNS = 'http://www.w3.org/1998/Math/MathML';
 
 
 export function criarElementoMath(tag) {
-  return document.createElementNS(mathNS, tag);  
+  return document.createElementNS(mathNS, tag);
 }
 
 
@@ -24,7 +24,7 @@ export function representarSistema(sistema, representacao) {
       tabelaMat.appendChild(gerarCongruencia(sistema[i], i, { representacao }));
       tabelaMat.appendChild(espacamento(2));
     }
-  
+
   matematica.appendChild(tabelaMat);
 
   return matematica;
@@ -45,9 +45,7 @@ export function valorVariavel(valor, { variavel, indice, mod } = {}) {
     if (!variavel && !ehNuloUndef(indice)) rowResolucao.appendChild(criarCelulaSimples());
 
     rowResolucao.appendChild(criarCelulaSimples(variavel, { indice }));
-
     rowResolucao.appendChild(criarCelulaSimples(mod ? '≡' : '='));
-
     rowResolucao.appendChild(typeof valor === 'object' ? valor : criarCelulaSimples(valor));
 
     if (mod) rowResolucao.appendChild(gerarMod(mod));
@@ -99,7 +97,7 @@ export function fracaoSimples(numerador, denominador) {
 
     // TODO: adicionar margem embaixo
     if (denominador[1]) den.style = 'margin-left:5px;';
-  
+
   fracao.appendChild(num);
   fracao.appendChild(den);
 

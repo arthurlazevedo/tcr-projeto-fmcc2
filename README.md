@@ -4,11 +4,13 @@ TCR para Web
 
 ## Rodar facilmente
 
+Navegue até o diretório onde o repositório está localizado e rode:
+
 ```shell
 $ python3 -m http.server
 ```
 
-ou, caso esteja no windows (eca)
+ou, caso esteja no windows:
 
 ```shell
 $ python -m http.server
