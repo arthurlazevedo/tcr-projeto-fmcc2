@@ -1,4 +1,4 @@
-import { totienteEuler, minimoDivComum, coprimos } from './matematica.js';
+import { minimoDivComum, coprimos } from './matematica.js';
 import { explicacoes } from '../constantes.js';
 
 export function temSolucao(a, b, mod) {
@@ -9,9 +9,10 @@ export function temSolucao(a, b, mod) {
 export function inversoModular(a, mod) {
   // não tem inverso, retorna um "erro"
   if (!coprimos(a, mod)) return -1;
-  const expoente = totienteEuler(mod) - 1;
 
-  return (a**expoente) % mod;
+  for (let i = 0; i < mod; i++) {
+    if (a * i % mod === 1) return i;
+  }
 }
 
 
@@ -21,7 +22,7 @@ export function canonico(congruencia) {
 
 
 export function solCongruenciaLinear(a, c, m) {
-  if (!temSolucao(a, c, m)) return -1;
+  if (!temSolucao(a, c, m)) return null;
 
   if (a === 1) {
     if (c < m) return { a, c, m, explicacao: explicacoes.canon };

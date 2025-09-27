@@ -22,18 +22,6 @@ export function ehPrimo(numero) {
 }
 
 
-export function totienteEuler(numero) {
-  if (ehPrimo(numero)) return numero - 1;
-
-  let totiente = 0;
-  for (let i = 1; i < numero; i++) {
-    if (coprimos(numero, i)) totiente += 1;
-  }
-
-  return totiente;
-}
-
-
 export function coprimos(a, b) {
   return minimoDivComum(a, b) == 1;
 }

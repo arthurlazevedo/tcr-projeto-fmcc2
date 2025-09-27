@@ -1,16 +1,14 @@
 :root {
-  --primaria : #66bb6a;
-  --aviso    : #ee4643;
-  --fundo    : white;
-  --info     : #42a5f5;
+  --perigo : #ee4643; /* TODO: tentar achar uma cor melhor pra isso*/
+  --aviso  : rgb(67, 74, 81);
+  --menu   : rgba(90, 149, 200, 0.353);
+  --hint   : rgba(0, 0, 0, 0.7);
 }
-
 
 body {
   margin: 0;
   font-size: 1.8rem;
 }
-
 
 main {
   flex-direction : row;
@@ -18,18 +16,32 @@ main {
   gap            : 30px;
 }
 
-
 *:focus {
   outline: 0;
 }
 
 
 #menu {
-  border-right : 1px solid rgb(219, 219, 219);;
-  box-sizing   : border-box;
-  position     : relative;
-  height       : 100vh;
-  width        : 400px;
+  flex-direction : column;
+  border-right   : 1px solid rgb(219, 219, 219);;
+  box-sizing     : border-box;
+  position       : relative;
+  display        : flex;
+  height         : 100vh;
+  width          : 400px;
+}
+
+
+#acoes {
+  position   : relative;
+  height     : 50px;
+  background : var(--menu);
+}
+
+#sistemas {
+  overflow-y : auto;
+  flex-grow: 1;
+  width      : calc(100% + 1px);
 }
 
 
@@ -41,19 +53,19 @@ main {
 
 
 input[type="text"] {
-  background-color : #fff;
-  padding-bottom   : 2px !important;
-  vertical-align   : middle;
-  margin-right     : 4px;
-  font-family      : 'Times new Roman';
-  font-size        : inherit;
-  position         : relative;
-  padding          : 0;
-  border           : none;
-  bottom           : 2px;
-  color            : inherit;
-  width            : 21px;
-  text-align       : end;
+  padding-bottom : 2px !important;
+  vertical-align : middle;
+  margin-right   : 4px;
+  font-family    : 'Times new Roman';
+  background     : #fff;
+  font-size      : inherit;
+  position       : relative;
+  padding        : 0;
+  border         : none;
+  bottom         : 2px;
+  color          : inherit;
+  width          : 21px;
+  text-align     : end;
 }
 
 
@@ -62,15 +74,8 @@ input::placeholder {
 }
 
 
-input.direito::placeholder {
-  vertical-align : middle;
-  margin-right   : 1px;
-  text-align     : end;
-}
-
-
 button {
-  border-radius : 2px;
+  border-radius : 4px;
   font-weight   : bold;
   padding       : 2.7px 8px;
   border        : 0;
@@ -78,40 +83,30 @@ button {
 }
 
 
-button#calcular {
-  background : var(--primaria);
+#calcular {
   font-size  : 1.5rem;
   position   : absolute;
   padding    : 4px 7px;
+  cursor     : pointer;
+  height     : 40px;
   bottom     : 5px;
   border     : 0;
+  background : inherit;
+  color      : white;
   width      : 150px;
-  height     : 40px;
   right      : 10px;
 }
 
-button.out {
-  background-color : inherit;
-  padding          : 2px 4px;
-}
-
-button.out-info {
-  color: var(--info);
-}
-
-button.out-warning {
-  color: var(--aviso);
-}
-
-.ml-2 {
-  margin-left: 2px;
+#calcular:disabled {
+  /* background : #4e7b50ee; */
+  cursor     : not-allowed;
 }
 
 .lixeira {
   font-size : 18px !important;
   position  : absolute;
   cursor    : pointer;
-  color     : var(--aviso);
+  color     : var(--perigo);
   right     : 3px;
   top       : 3px;
 }
@@ -121,12 +116,10 @@ button.out-warning {
 }
 
 .congruencia {
-  box-sizing : border-box;
   background : #fff;
   position   : relative;
   border     : 1px solid #c0ccda;
   height     : 50px;
-  width      : calc(100% + 1px);
 }
 
 .congruencia:focus-within {
@@ -151,12 +144,13 @@ button.out-warning {
 }
 
 .relatorio-erro {
-  background-color : rgba(90, 149, 200, 0.353);
-  margin-right     : 5px;
-  display          : inline-flex;
-  height           : 100%;
-  width            : 12%;
-  top              : 0;
+  margin-right : 5px;
+  background   : rgba(90, 149, 200, 0.353);
+  position     : relative;
+  display      : inline-flex;
+  height       : 100%;
+  width        : 12%;
+  top          : 0;
 }
 
 .relatorio-erro::before {
@@ -166,4 +160,59 @@ button.out-warning {
   content     : attr(data-id);
   margin      : 2px 0 0 3px;
   color       : rgb(67, 74, 81);
+}
+
+.congruencia:focus-within > .relatorio-erro > span > i {
+  color: white;
+}
+
+.relatorio-erro > span {
+  position : absolute;
+  right    : 11px;
+}
+
+.relatorio-erro > span:has(> .fa-exclamation-triangle) {
+  top: 15px;
+}
+
+.relatorio-erro > span:has(> .fa-info-circle) {
+  font-size: 2rem;
+  top      : 13px;
+}
+
+.relatorio-erro > span:hover::after {
+  border-radius : 5px;
+  background    : var(--hint);
+  font-family   : sans-serif;
+  font-size     : 1.1rem;
+  position      : absolute;
+  content       : attr(data-hint);
+  display       : block;
+  padding       : 5px;
+  z-index       : 1;
+  color         : white;
+  width         : 200px;
+  left          : -5px;
+  top           : 38px;
+}
+
+.relatorio-erro > span:hover::before {
+  background : var(--hint);
+  clip-path  : polygon(0% 100%, 50% 0%, 100% 100%);
+  position   : absolute;
+  content    : '';
+  display    : block;
+  z-index    : 1;
+  height     : 10px;
+  width      : 20px;
+  left       : 4px;
+  top        : 28px;
+}
+
+.aviso {
+  color: var(--aviso);
+}
+
+.perigo {
+  color: var(--perigo);
 }

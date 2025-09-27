@@ -6,7 +6,6 @@ import { representarSistema, representarM, valorVariavel, criarParenteMath, cria
 const resultados = document.getElementById('resultados');
 
 export function resolverSistema(sistema) {
-  // apaga os resultados anteriores
   resultados.replaceChildren();
   
   let mods         = sistema.map(congruencia => congruencia.m);
@@ -161,6 +160,7 @@ function calcularDk(sistema) {
       const mtable = criarElementoMath('mtable');
       sistema.forEach((congruencia, idx) => {
         const d = inversoModular(congruencia.N, congruencia.m);
+        console.log(d);
         congruencia.d = d;
         mtable.appendChild(gerarCongruencia({ a: 'N', c: 1, m: 'm' }, idx, { variavel: 'd' }));
         mtable.appendChild(gerarCongruencia({ a: congruencia.N, c: 1, m: congruencia.m }, idx, { variavel: 'd', adicionaPos: false }));
