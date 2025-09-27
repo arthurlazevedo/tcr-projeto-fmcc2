@@ -1,6 +1,8 @@
 import { temSolucao } from "./nerdolice/congruencias.js";
 import { resolverSistema } from "./resultados.js";
 import { ehNumero } from "./utilitarios/utilitarios.js";
+import { errosCongruencias } from "./constantes.js";
+import { numeroCoprimoA } from "./nerdolice/matematica.js";
 
 document.onkeydown = e => {
   if (e.ctrlKey && e.key === 'Enter') {
@@ -10,7 +12,48 @@ document.onkeydown = e => {
 }
 
 const btnCalcular = document.getElementById('calcular');
+const adicaoCong  = document.getElementById('adicionar-congruencias');
+const opcoesCong  = document.getElementById('opcoes-adicao');
 const sistemas    = document.getElementById('sistemas');
+
+adicaoCong.onfocus = () => opcoesCong.classList.remove('escondido');
+adicaoCong.onblur = () => opcoesCong.classList.add('escondido')
+
+opcoesCong.firstElementChild.onclick = () => {
+  adicionaNovaCongruencia();
+  const a = sistemas.lastElementChild.querySelector('input');
+  a.focus();
+};
+
+opcoesCong.lastElementChild.onclick = e => {
+  if (sistemas.children.length >= 6) {
+    opcoesCong.lastElementChild.title = 'Desabilitado pois estourou o limite';
+    opcoesCong.lastElementChild.classList.add('desabilitado');
+    e.preventDefault();
+    return;
+  }
+  
+  const mods = [];
+  for (const congruencia of sistemas.children) {
+    const mod = congruencia.querySelectorAll('input')[2].value;
+    if (!mod) continue;
+
+    mods.push(ehNumero(mod) ? parseInt(mod) : 0);
+  }
+
+  const modCoprimo = numeroCoprimoA(mods);
+  const numeroA    = numeroCoprimoA([modCoprimo]);
+
+  adicionaNovaCongruencia();
+  const [a, c, m] = sistemas.lastElementChild.querySelectorAll('input');
+  a.value = numeroA;
+  a.dispatchEvent(new Event('beforeinput'));
+  c.value = Math.floor(Math.random() * modCoprimo);
+  c.dispatchEvent(new Event('beforeinput'));
+  m.value = modCoprimo;
+  m.dispatchEvent(new Event('beforeinput'));
+  a.focus();
+}
 
 btnCalcular.onclick = () => {
   const sistema = [];
@@ -18,7 +61,13 @@ btnCalcular.onclick = () => {
   for (const congruencia of sistemas.children) {
     const [a, c, m] = valoresCongruencia(congruencia);
 
-    if (temErro(congruencia)) continue;
+    const erro = erroCongruencia(congruencia)
+    if (erro[1] === 'perigo') {
+      adicionaErro(congruencia.firstChild, erro);
+      return;
+    }
+
+    if (erro[0]) continue;
     sistema.push({ a: a || 1, c, m });
   }
 
@@ -78,7 +127,7 @@ function atalhosTecladoCongruencia(e) {
 }
 
 function adicionaNovaCongruencia(noAnterior) {
-  const numeroCongruencia = sistemas.children.length + 1;
+  const numeroCongruencia = noAnterior ? parseInt(noAnterior.id.replace('congruencia-linear-', '')) + 1 : sistemas.children.length + 1;
 
   const congruenciaDiv = document.createElement('div');
     congruenciaDiv.id        = `congruencia-linear-${numeroCongruencia}`;
@@ -106,7 +155,7 @@ function adicionaNovaCongruencia(noAnterior) {
           sistemas.removeChild(congruenciaDiv);
 
           if (noAnterior) {
-            ajustaIndice(noAnterior);
+            ajustaIndice(noAnterior, '-');
             noAnterior.click();
           }
         }
@@ -124,18 +173,19 @@ function adicionaNovaCongruencia(noAnterior) {
 
   if (noAnterior) {
     sistemas.insertBefore(congruenciaDiv, noAnterior.nextElementSibling);
-    a.focus();
+    ajustaIndice(congruenciaDiv, '+');
   } else {
     sistemas.appendChild(congruenciaDiv);
   }
+  a.focus();
 }
 
 
-function ajustaIndice(congruencia) {
+function ajustaIndice(congruencia, op) {
   while (congruencia.nextElementSibling !== null) {
     congruencia = congruencia.nextElementSibling;
 
-    const numeroAjustado = parseInt(congruencia.id.replace('congruencia-linear-', '')) - 1;
+    const numeroAjustado = parseInt(congruencia.id.replace('congruencia-linear-', '')) + (op === '+' ? 1 : -1);
 
     congruencia.id = `congruencia-linear-${numeroAjustado}`;
     congruencia.querySelectorAll('input').forEach(input => (input.id = `${input.id[0]}-${numeroAjustado}`));
@@ -173,48 +223,38 @@ function validaCongruencia(e) {
   const congruencia = e.target.parentElement;
   const erroCong    = congruencia.firstChild;
   if (congruencia.contains(e.relatedTarget)) return;
-  erroCong.innerHTML = '';
+  erroCong.replaceChildren();
 
-  const [a, c, m] = valoresCongruencia(congruencia);
+  const erro = erroCongruencia(congruencia);
 
-  if (isNaN(c) && isNaN(m)) {
-    const iconeAviso = criaIconeTriangulo('perigo', 'Congruência mal-formada');
-    erroCong.appendChild(iconeAviso);
-    return;
-  }
-  
-  if (isNaN(c)) {
-    const iconeAviso = criaIconeTriangulo('perigo', 'Valor inválido para a congruência linear');
-    erroCong.appendChild(iconeAviso);
-    return;
-  }
-
-  if (isNaN(m) || m === 0) {
-    const iconeAviso = criaIconeTriangulo('perigo', 'Módulo inválido para a congruência linear');
-    erroCong.appendChild(iconeAviso);
-    return;
-  }
-
-  if (!temSolucao(isNaN(a) ? 1 : a, c, m)) {
-    const iconeAviso = criaIconeTriangulo('perigo', 'A congruência linear não possui solução');
-    erroCong.appendChild(iconeAviso);
-    return;
-  }
-
-  if (a === 0 && c % m === 0) {
-    const iconeDica = criaIconeTriangulo('aviso', 'A congruência possui infinitas soluções');
-    erroCong.appendChild(iconeDica);
+  if (erro.length) {
+    adicionaErro(erroCong, erro);
+    if (erro[1] === 'perigo') return;
   }
 }
 
 
-function temErro(congruencia) {
+function adicionaErro(erroCong, tipoErro) {
+  const iconeErro = criaIconeTriangulo(tipoErro[1], tipoErro[0]);
+  erroCong.appendChild(iconeErro);
+
+  if (tipoErro[1] === 'perigo') btnCalcular.disabled = true;
+}
+
+
+function erroCongruencia(congruencia) {
   const [a, c, m] = valoresCongruencia(congruencia);
+  const cNaN = isNaN(c);
+  const mNaN = isNaN(m);
 
-  if (isNaN(c) || isNaN(m) || m === 0) return true;
-  if (!temSolucao(isNaN(a) ? 1 : a, c, m)) return true;
+  if (cNaN && mNaN) return [errosCongruencias.errada, 'aviso'];
+  if (mNaN || m === 0) return [errosCongruencias.modulo, 'perigo'];
+  if (cNaN) return [errosCongruencias.modulo, 'perigo'];
 
-  return false;
+  if (!temSolucao(isNaN(a) ? 1 : a, c, m)) return [errosCongruencias.semSolucao, 'perigo'];
+  if (a === 0 && c % m === 0) return [errosCongruencias.infinito, 'aviso'];
+
+  return [];
 }
 
 
@@ -272,7 +312,7 @@ function focaProximoInput(e, teclaProximo) {
 }
 
 function adaptaInput(e) {
-  if ((!ehNumero(e.data) || !e.data?.trim()) && e.data !== null) {
+  if ((!ehNumero(e.data) || !e.data?.trim()) && e.data !== null && e.isTrusted) {
     e.preventDefault();
     return;
   }
@@ -281,12 +321,15 @@ function adaptaInput(e) {
   let quantNums = input.value.length;
 
   if (e.inputType === 'deleteContentBackward') quantNums = Math.max(quantNums - 2, 0);
-  if (quantNums === 7) return; // reportar que só pode até essa quant aí  
+  if ((quantNums + 1) === 6 && e.data) {
+    e.preventDefault();
+    return;
+  }
 
   if (!quantNums || e.inputType === 'deleteWordBackward') {
     input.style.width = '21px';
-  } else if (quantNums < 4) {
-    input.style.width = (quantNums + 1) * 14.5 + 'px';
+  } else {
+    input.style.width = (e.isTrusted ? quantNums + 1 : quantNums) * 14.5 + 'px';
   }
 }
 

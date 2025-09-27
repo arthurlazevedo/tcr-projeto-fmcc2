@@ -1,148 +1,25 @@
 :root {
-  --perigo : #ee4643; /* TODO: tentar achar uma cor melhor para o triângulo, essa é meio estourada, pra lixeira fica bom*/
+  --perigo : #ee4643;
   --aviso  : rgb(67, 74, 81);
   --menu   : rgba(90, 149, 200, 0.353);
   --hint   : rgba(0, 0, 0, 0.7);
 }
+
 
 body {
   font-size : 1.8rem;
   margin    : 0;
 }
 
+
 main {
   flex-direction : row;
   display        : flex;
 }
 
+
 *:focus {
   outline: 0;
-}
-
-
-#menu {
-  flex-direction : column;
-  border-right   : 1px solid rgb(219, 219, 219);;
-  box-sizing     : border-box;
-  position       : relative;
-  display        : flex;
-  height         : 100vh;
-  width          : 400px;
-}
-
-
-#acoes {
-  background : var(--menu);
-  position   : relative;
-  height     : 50px;
-}
-
-#sistemas {
-  overflow-y : auto;
-  flex-grow  : 1;
-  width      : calc(100% + 1px);
-}
-
-
-#resultados {
-  background-color : var(--menu);
-  flex-direction   : column !important;
-  box-sizing       : content-box;
-  flex-grow        : 1;
-  position         : relative;
-  padding          : 50px 15px 10px 20px;
-  display          : flex;
-  height           : calc(100vh - 60px);
-  gap              : 10px;
-}
-
-#resultados::before {
-  font-family : sans-serif;
-  font-weight : bold;
-  position    : absolute;
-  content     : 'Resultados do TCR';
-  color       : rgba(67, 74, 81, 0.653);
-  left        : 30px;
-  top         : 10px;
-}
-
-#resultados > * {
-  background-color : white;
-  border-radius    : 5px;
-}
-
-#canonizar {
-  overflow-y: auto;
-  display: none;
-}
-
-#canonizar.display {
-  display: block;
-  height: 35%;
-}
-
-#passo-a-passo {
-  background-color : white;
-  box-sizing       : content-box;
-  overflow-y       : auto;
-  flex-grow        : 1;
-}
-
-
-.titulo-secao {
-  margin-bottom : 10px;
-  font-family   : sans-serif;
-  background    : rgba(112, 160, 144, 0.746);
-  font-size     : 1.5rem;
-  font-weight   : bold;
-  margin-left   : 3px;
-  margin-top    : 5px;
-  display       : inline-block;
-  padding       : 0 10px;
-  color         : white;
-}
-
-.descricao-secao {
-  font-family: sans-serif;
-  font-size: 1.5rem;
-  margin-left: 3px;
-}
-
-.explicacao {
-  margin-bottom : 15px;
-  text-align    : center;
-  margin-top    : 7px;
-  display       : block;
-}
-
-
-.lista-nao-coprimos {
-  list-style-type : '-  ';
-  margin-bottom   : 5px !important;
-  line-height     : 1.5;
-  margin          : auto;
-  width           : fit-content;
-}
-
-input[type="text"] {
-  padding-bottom : 2px !important;
-  vertical-align : middle;
-  margin-right   : 4px;
-  font-family    : 'Times new Roman';
-  background     : #fff;
-  font-size      : inherit;
-  position       : relative;
-  padding        : 0;
-  border         : none;
-  bottom         : 2px;
-  color          : inherit;
-  width          : 21px;
-  text-align     : end;
-}
-
-
-input::placeholder {
-  color: rgb(136, 136, 136);
 }
 
 
@@ -154,6 +31,96 @@ button {
   color         : white;
 }
 
+input[type="text"] {
+  padding-bottom : 2px !important;
+  vertical-align : middle;
+  margin-right   : 4px;
+  font-family    : 'Times new Roman';
+  background     : #fff;
+  text-align     : end;
+  font-size      : inherit;
+  position       : relative;
+  padding        : 0;
+  border         : none;
+  bottom         : 2px;
+  color          : inherit;
+  width          : 21px;
+}
+
+
+input::placeholder {
+  color: rgb(136, 136, 136);
+}
+
+
+#acoes {
+  background : var(--menu);
+  position   : relative;
+  height     : 50px;
+}
+
+#adicionar-congruencias {
+  font-size : 2.2rem;
+  position  : absolute;
+  z-index   : 1;
+  color     : white;
+  left      : 12px;
+  top       : 9px;
+}
+
+#adicionar-congruencias > #opcoes-adicao.escondido {
+  display: none;
+}
+
+#opcoes-adicao {
+  border-bottom : 0 !important;
+  font-family   : sans-serif;
+  background    : white;
+  font-size     : 1.2rem;
+  position      : absolute;
+  display       : block;
+  z-index       : 1;
+  border        : 1px solid #c0ccda;
+  height        : 80px;
+  color         : var(--hint);
+  width         : 300px;
+  left          : -7.5px;
+  top           : 45px;
+}
+
+#opcoes-adicao::before {
+  background : white;
+  clip-path  : polygon(0% 100%, 50% 0%, 100% 100%);
+  position   : absolute;
+  display    : block;
+  content    : '';
+  z-index    : 1;
+  height     : 15px;
+  width      : 30px;
+  left       : 5px;
+  top        : -10px;
+}
+
+#opcoes-adicao:has(> span:first-child:hover)::before {
+  background: rgb(235, 230, 230);
+}
+
+#opcoes-adicao > span {
+  border-bottom : 1px solid #c0ccda;
+  text-align    : center;
+  display       : block;
+  padding       : 10px;
+  cursor        : pointer;
+}
+
+#opcoes-adicao > span:hover {
+  background: rgb(235, 230, 230);
+}
+
+#opcoes-adicao > span.desabilitado {
+  background : rgb(192, 192, 192);
+  cursor     : not-allowed;
+}
 
 #calcular {
   font-size  : 1.5rem;
@@ -169,17 +136,29 @@ button {
   right      : 10px;
 }
 
-.lixeira {
-  font-size : 18px !important;
-  position  : absolute;
-  cursor    : pointer;
-  color     : var(--perigo);
-  right     : 3px;
-  top       : 3px;
+#calcular:disabled {
+  filter: brightness(90%);
+  cursor: not-allowed;
 }
 
-.lixeira:hover {
-  filter: brightness(92%);
+#calcular:hover {
+  background: rgba(90, 149, 200, 0.502);
+}
+
+#menu {
+  flex-direction : column;
+  border-right   : 1px solid rgb(219, 219, 219);;
+  box-sizing     : border-box;
+  position       : relative;
+  display        : flex;
+  height         : 100vh;
+  width          : 450px;
+}
+
+#sistemas {
+  overflow-y : auto;
+  flex-grow  : 1;
+  width      : calc(100% + 1px);
 }
 
 .congruencia {
@@ -243,8 +222,8 @@ button {
 }
 
 .relatorio-erro > span:has(> .fa-info-circle) {
-  font-size: 2rem;
-  top      : 13px;
+  font-size : 2rem;
+  top       : 13px;
 }
 
 .relatorio-erro > span:hover::after {
@@ -274,6 +253,97 @@ button {
   width      : 20px;
   left       : 4px;
   top        : 28px;
+}
+
+.lixeira {
+  font-size : 18px !important;
+  position  : absolute;
+  cursor    : pointer;
+  color     : var(--perigo);
+  right     : 3px;
+  top       : 3px;
+}
+
+.lixeira:hover {
+  filter: brightness(92%);
+}
+
+#resultados {
+  background-color : var(--menu);
+  flex-direction   : column !important;
+  box-sizing       : content-box;
+  flex-grow        : 1;
+  position         : relative;
+  padding          : 50px 25px 20px 20px;
+  display          : flex;
+  height           : calc(100vh - 70px);
+  gap              : 10px;
+}
+
+#resultados::before {
+  font-family : sans-serif;
+  font-weight : bold;
+  position    : absolute;
+  content     : 'Resultados do TCR';
+  color       : rgba(67, 74, 81, 0.653);
+  left        : 30px;
+  top         : 10px;
+}
+
+#resultados > * {
+  background-color : white;
+  border-radius    : 5px;
+}
+
+#canonizar {
+  overflow-y : auto;
+  display    : none;
+}
+
+#canonizar.display {
+  display: block;
+}
+
+#passo-a-passo {
+  background-color : white;
+  box-sizing       : content-box;
+  overflow-y       : auto;
+  flex-grow        : 1;
+}
+
+.titulo-secao {
+  margin-bottom : 10px;
+  font-family   : sans-serif;
+  background    : rgba(112, 160, 144, 0.746);
+  font-size     : 1.5rem;
+  font-weight   : bold;
+  margin-left   : 3px;
+  margin-top    : 5px;
+  display       : inline-block;
+  padding       : 0 10px;
+  color         : white;
+}
+
+.descricao-secao {
+  font-family : sans-serif;
+  margin-left : 3px;
+  font-size   : 1.5rem;
+}
+
+.explicacao {
+  margin-bottom : 15px;
+  text-align    : center;
+  margin-top    : 7px;
+  display       : block;
+}
+
+
+.lista-nao-coprimos {
+  list-style-type : '-  ';
+  margin-bottom   : 5px !important;
+  line-height     : 1.5;
+  margin          : auto;
+  width           : fit-content;
 }
 
 .aviso {

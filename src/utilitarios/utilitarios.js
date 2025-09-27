@@ -18,7 +18,7 @@ export function numeralParaRomano(numero) {
 
     if (mod < 4) {
       algarismo.unshift(repete(algarismos[idx][0], mod));
-      if (num > 5) algarismo.unshift(algarismos[idx][1]);
+      if (num >= 5) algarismo.unshift(algarismos[idx][1]);
     } else if (mod === 4) {
       algarismo.unshift(algarismos[idx][0], algarismos[num >= 5 ? idx + 1: idx][num > 5 ? 0 : 1]);
     } else {

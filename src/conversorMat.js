@@ -95,7 +95,6 @@ export function fracaoSimples(numerador, denominador) {
     const num = criarCelulaSimples(numerador, { comoCelula: false });
     const den = criarCelulaSimples(valor, { indice, comoCelula: false });
 
-    // TODO: adicionar margem embaixo
     if (denominador[1]) den.style = 'margin-left:5px;';
 
   fracao.appendChild(num);

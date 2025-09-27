@@ -30,3 +30,15 @@ export function coprimos(a, b) {
 export function multiplicaLista(nums) {
   return nums.reduce((anterior, atual) => anterior * atual, 1);
 }
+
+
+export function numeroCoprimoA(listaNums) {
+  const maior = listaNums.length ? Math.max(...listaNums) : 101;
+
+  let coprimo = Math.floor(Math.random() * maior);
+  while (!listaNums.every(num => coprimos(num, coprimo)) || coprimo === 0) {
+    coprimo = Math.floor(Math.random() * maior);
+  }
+
+  return coprimo;
+}
