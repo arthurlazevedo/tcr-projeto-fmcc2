@@ -33,11 +33,11 @@ export function multiplicaLista(nums) {
 
 
 export function numeroCoprimoA(listaNums) {
-  const maior = listaNums.length ? Math.max(...listaNums) : 101;
+  const primoGrande = 1069;
 
-  let coprimo = Math.floor(Math.random() * maior);
+  let coprimo = Math.floor(Math.random() * primoGrande);
   while (!listaNums.every(num => coprimos(num, coprimo)) || coprimo === 0) {
-    coprimo = Math.floor(Math.random() * maior);
+    coprimo = Math.floor(Math.random() * primoGrande);
   }
 
   return coprimo;

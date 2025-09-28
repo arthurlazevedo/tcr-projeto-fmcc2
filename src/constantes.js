@@ -21,3 +21,7 @@ export const errosCongruencias = {
   errada     : 'Congruência mal-formada, logo será desconsiderada',
   modulo     : 'Módulo inválido para a congruência linear',
 }
+
+export const setaDireita = '&Rightarrow;';
+export const vezesPonto  = '&middot;';
+export const vezesInv    = '&#x2062;';

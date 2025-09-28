@@ -1,9 +1,10 @@
 import { ehNuloUndef, ehNumero, numeralParaRomano } from "./utilitarios/utilitarios.js";
+import { setaDireita, vezesInv } from "./constantes.js";
 
 const mathNS = 'http://www.w3.org/1998/Math/MathML';
 
 
-export function criarElementoMath(tag) {
+function criarElementoMath(tag) {
   return document.createElementNS(mathNS, tag);
 }
 
@@ -12,28 +13,20 @@ export function criarParenteMath() {
   const matematica = criarElementoMath('math');
   matematica.setAttribute('display', 'block');
 
-  return matematica;
+  const tabelaMat = criarElementoMath('mtable');
+  matematica.appendChild(tabelaMat);
+
+  return [matematica, tabelaMat];
 }
 
 
 export function representarSistema(sistema, representacao) {
-  const matematica = criarParenteMath();
+  const [matematica, tabelaMat] = criarParenteMath();
 
-    const tabelaMat = criarElementoMath('mtable');
-    for (let i = 0; i < sistema.length; i++) {
-      tabelaMat.appendChild(gerarCongruencia(sistema[i], i, { representacao }));
-      tabelaMat.appendChild(espacamento(2));
-    }
-
-  matematica.appendChild(tabelaMat);
-
-  return matematica;
-}
-
-
-export function representarM(mods, M) {
-  const matematica = criarParenteMath();
-  matematica.appendChild(resolucaoPassoPasso('M', mods.map(m => ({ m })), M, ['&middot;']));
+  for (let i = 0; i < sistema.length; i++) {
+    tabelaMat.appendChild(gerarCongruencia(sistema[i], i, { representacao }));
+    tabelaMat.appendChild(espacamento(2));
+  }
 
   return matematica;
 }
@@ -54,30 +47,29 @@ export function valorVariavel(valor, { variavel, indice, mod } = {}) {
 
 
 export function resolucaoPassoPasso(varResolver, valores, valorFinal, operacao, mod) {
-  const tabela = criarElementoMath('mtable');
+  const [matematica, tabelaMat] = criarParenteMath();
 
-  // TODO: se eu não conseguir fazer a parada de diferenciar se é uma ou várias equações, não precisa do último se o tamanho for 1
-  tabela.appendChild(valorVariavel(comOperacao(valores, operacao, true), { variavel: varResolver, mod }));
-  tabela.appendChild(valorVariavel(comOperacao(valores, operacao, false), { mod }));
-  tabela.appendChild(valorVariavel(valorFinal, { mod }));
+  tabelaMat.appendChild(valorVariavel(comOperacao(valores, operacao, true), { variavel: varResolver, mod }));
+  tabelaMat.appendChild(valorVariavel(comOperacao(valores, operacao, false), { mod }));
 
-  if (mod) tabela.appendChild(valorVariavel(valorFinal % mod, { mod }));
+  if (valores.length > 1) tabelaMat.appendChild(valorVariavel(valorFinal, { mod }));
+  if (mod) tabelaMat.appendChild(valorVariavel(valorFinal % mod, { mod }));
 
-  return tabela;
+  return matematica;
 }
 
 
 export function gerarCongruencia(congruencia, indice, { representacao, variavel, adicionaPos = true } = {}) {
   const linhaTabela = criarElementoMath('mtr');
-  if (!ehNuloUndef(indice)) linhaTabela.appendChild(adicionaPos ? posicaoCongruencia(indice): criarCelulaSimples());
 
+  if (!ehNuloUndef(indice)) linhaTabela.appendChild(adicionaPos ? posicaoCongruencia(indice) : criarCelulaSimples());
   linhaTabela.appendChild(gerarA(congruencia.a, variavel, indice));
   linhaTabela.appendChild(criarCelulaSimples('≡'));
   linhaTabela.appendChild(criarCelulaSimples(congruencia.c));
   linhaTabela.appendChild(gerarMod(congruencia.m, indice));
 
   if (representacao) {
-    linhaTabela.appendChild(criarCelulaSimples('&Rightarrow;'));
+    linhaTabela.appendChild(criarCelulaSimples(setaDireita));
     linhaTabela.appendChild(gerarA());
     linhaTabela.appendChild(criarCelulaSimples('≡'));
     linhaTabela.appendChild(criarCelulaSimples('c', { indice }));
@@ -95,7 +87,7 @@ export function fracaoSimples(numerador, denominador) {
     const num = criarCelulaSimples(numerador, { comoCelula: false });
     const den = criarCelulaSimples(valor, { indice, comoCelula: false });
 
-    if (denominador[1]) den.style = 'margin-left:5px;';
+    if (indice) den.style = 'margin-left:5px;';
 
   fracao.appendChild(num);
   fracao.appendChild(den);
@@ -151,7 +143,7 @@ function gerarA(valorA, variavel, indice) {
 
     if (valorA && valorA !== 1) {
       const a = criarCelulaSimples(valorA, { indice, comoCelula: false });
-      const vezes = operacao('&#x2062;');
+      const vezes = operacao(vezesInv);
 
       linha.appendChild(a);
       linha.appendChild(vezes);

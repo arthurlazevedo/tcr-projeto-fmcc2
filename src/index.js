@@ -25,33 +25,39 @@ opcoesCong.firstElementChild.onclick = () => {
   a.focus();
 };
 
-opcoesCong.lastElementChild.onclick = e => {
-  if (sistemas.children.length >= 6) {
-    opcoesCong.lastElementChild.title = 'Desabilitado pois estourou o limite';
-    opcoesCong.lastElementChild.classList.add('desabilitado');
-    e.preventDefault();
-    return;
-  }
-  
+// TODO: permitir deletar todos?
+opcoesCong.lastElementChild.onclick = () => {
   const mods = [];
-  for (const congruencia of sistemas.children) {
-    const mod = congruencia.querySelectorAll('input')[2].value;
-    if (!mod) continue;
 
-    mods.push(ehNumero(mod) ? parseInt(mod) : 0);
+  let congruenciaSubstituir = null;
+  for (const congruencia of sistemas.children) {
+    const erro = erroCongruencia(congruencia);
+
+    if (erro.length) {
+      if (erro[0] === errosCongruencias.errada) congruenciaSubstituir = congruencia;
+      continue;
+    }
+    
+    const mod = parseInt(congruencia.querySelectorAll('input')[2].value);
+    mods.push(mod);
   }
 
   const modCoprimo = numeroCoprimoA(mods);
   const numeroA    = numeroCoprimoA([modCoprimo]);
 
-  adicionaNovaCongruencia();
+  adicionaNovaCongruencia(congruenciaSubstituir, true);
+
   const [a, c, m] = sistemas.lastElementChild.querySelectorAll('input');
+
   a.value = numeroA;
   a.dispatchEvent(new Event('beforeinput'));
+
   c.value = Math.floor(Math.random() * modCoprimo);
   c.dispatchEvent(new Event('beforeinput'));
+
   m.value = modCoprimo;
   m.dispatchEvent(new Event('beforeinput'));
+
   a.focus();
 }
 
@@ -71,11 +77,7 @@ btnCalcular.onclick = () => {
     sistema.push({ a: a || 1, c, m });
   }
 
-  if (sistema.length) {
-    resolverSistema(sistema);
-  } else {
-    // TODO
-  }
+  if (sistema.length) resolverSistema(sistema);
 }
 
 function atalhosTecladoCongruencia(e) {
@@ -94,19 +96,12 @@ function atalhosTecladoCongruencia(e) {
       break;
 
     case 'Backspace':
-      if (e.shiftKey && (noAnterior || proximoNo)) {
-        rmCongruencia.click();
-        e.stopPropagation();
-        e.preventDefault();
-      }
-      break;
-
     case 'Delete':
-      if (noAnterior || proximoNo) {
-        rmCongruencia.click();
-        e.stopPropagation();
-        e.preventDefault();
-      }
+      if (!e.shiftKey && e.key === 'Backspace') break;
+
+      rmCongruencia.click();
+      e.stopPropagation();
+      e.preventDefault();
       break;
 
     case 'ArrowUp':
@@ -126,33 +121,36 @@ function atalhosTecladoCongruencia(e) {
   }
 }
 
-function adicionaNovaCongruencia(noAnterior) {
-  const numeroCongruencia = noAnterior ? parseInt(noAnterior.id.replace('congruencia-linear-', '')) + 1 : sistemas.children.length + 1;
+function adicionaNovaCongruencia(noAnterior, substituir = false) {
+  const numeroCongruencia = noAnterior ? 
+    parseInt(noAnterior.id.replace('congruencia-linear-', '')) + (substituir ? 0 : 1) : 
+    sistemas.children.length + 1;
 
   const congruenciaDiv = document.createElement('div');
     congruenciaDiv.id        = `congruencia-linear-${numeroCongruencia}`;
+    congruenciaDiv.tabIndex  = -1
     congruenciaDiv.className = 'congruencia';
-    congruenciaDiv.onkeydown = atalhosTecladoCongruencia;
     congruenciaDiv.onclick   = focaInputMaisProximo;
+    congruenciaDiv.onkeydown = atalhosTecladoCongruencia;
 
     // Por algum motivo, não tem suporte para isso como uma propriedade e tem que ser feito assim, js né
     congruenciaDiv.addEventListener('focusout', validaCongruencia);
 
-    const erroCongruencia = document.createElement('div');
-      erroCongruencia.id         = `erro-congruencia-${numeroCongruencia}`;  
-      erroCongruencia.className  = 'relatorio-erro';
-      erroCongruencia.dataset.id = numeroCongruencia;
+    const relatorioErro = document.createElement('div');
+      relatorioErro.id         = `relatorio-erro-${numeroCongruencia}`;  
+      relatorioErro.className  = 'relatorio-erro';
+      relatorioErro.dataset.id = numeroCongruencia;
 
-    const a = criaInputCongruencia('a', numeroCongruencia, 'x')
+    const a = criaInputCongruencia('a', numeroCongruencia, { proximo: 'x' })
 
     const rmCongruencia  = document.createElement('i');
       rmCongruencia.id        = `remover-congruencia-${numeroCongruencia}`;
-      rmCongruencia.className = 'fa fa-trash fa-sm lixeira';
       rmCongruencia.title     = 'Remover Congruência do Sistema';
+      rmCongruencia.className = 'fa fa-trash fa-sm lixeira';
       rmCongruencia.onclick   = () => {
         const noAnterior = congruenciaDiv.previousElementSibling;
         const proximoNo = congruenciaDiv.nextElementSibling;
-        
+
         if (noAnterior || proximoNo) {
           if (noAnterior) {
             ajustaIndice(noAnterior, '-');
@@ -162,25 +160,37 @@ function adicionaNovaCongruencia(noAnterior) {
             proximoNo.click();
           }
           sistemas.removeChild(congruenciaDiv);
+          mudaStatusAddCongValida();
+          mudaStatusBtnCalcular();
+        } else if (erroCongruencia(congruenciaDiv)[0] !== errosCongruencias.errada) {
+          sistemas.removeChild(congruenciaDiv);
+          adicionaNovaCongruencia();
+          mudaStatusBtnCalcular();
         }
       }
 
-  congruenciaDiv.appendChild(erroCongruencia);
+  congruenciaDiv.appendChild(relatorioErro);
   congruenciaDiv.appendChild(a);
   congruenciaDiv.appendChild(criaElementoSimples('i', 'x'));
   congruenciaDiv.appendChild(criaElementoSimples('span', ' ≡ '));
-  congruenciaDiv.appendChild(criaInputCongruencia('c', numeroCongruencia, '('));
+  congruenciaDiv.appendChild(criaInputCongruencia('c', numeroCongruencia, { proximo: '(', anterior: 'x' }));
   congruenciaDiv.appendChild(criaElementoSimples('i', '(mod '));
-  congruenciaDiv.appendChild(criaInputCongruencia('m', numeroCongruencia));
+  congruenciaDiv.appendChild(criaInputCongruencia('m', numeroCongruencia, { anterior: '(' }));
   congruenciaDiv.appendChild(criaElementoSimples('i', ')'));
   congruenciaDiv.appendChild(rmCongruencia);
 
   if (noAnterior) {
-    sistemas.insertBefore(congruenciaDiv, noAnterior.nextElementSibling);
-    ajustaIndice(congruenciaDiv, '+');
+    if (substituir) {
+      sistemas.replaceChild(congruenciaDiv, noAnterior);
+    } else {
+      sistemas.insertBefore(congruenciaDiv, noAnterior.nextElementSibling);
+      ajustaIndice(congruenciaDiv, '+');
+    }
   } else {
     sistemas.appendChild(congruenciaDiv);
   }
+
+  mudaStatusAddCongValida();
   a.focus();
 }
 
@@ -189,12 +199,13 @@ function ajustaIndice(congruencia, op) {
   while (congruencia.nextElementSibling !== null) {
     congruencia = congruencia.nextElementSibling;
 
-    const numeroAjustado = parseInt(congruencia.id.replace('congruencia-linear-', '')) + (op === '+' ? 1 : -1);
+    const numeroAjustado = parseInt(congruencia.id.replace(/\D/g, '')) + (op === '+' ? 1 : -1);
 
     congruencia.id = `congruencia-linear-${numeroAjustado}`;
     congruencia.querySelectorAll('input').forEach(input => (input.id = `${input.id[0]}-${numeroAjustado}`));
 
     const relatorioErro = congruencia.getElementsByClassName('relatorio-erro')[0];
+    relatorioErro.id = `relatorio-erro-${numeroAjustado}`
     relatorioErro.dataset.id = numeroAjustado;
 
     const lixeiraIcone = congruencia.getElementsByClassName('lixeira')[0];
@@ -203,43 +214,81 @@ function ajustaIndice(congruencia, op) {
 }
 
 
+function mudaStatusAddCongValida() {
+  const addCongValida = opcoesCong.lastElementChild;
+  const congruencias  = congruenciasValidas();
+
+  if (congruencias.length >= 6) {
+    addCongValida.title = 'Desabilitado pois estourou o limite';
+    addCongValida.classList.add('desabilitado');
+  } else {
+    addCongValida.title = undefined;
+    addCongValida.classList.remove('desabilitado');
+  }
+}
+
+
+function mudaStatusBtnCalcular() {
+  const congruenciasNaoErradas = congruenciasValidas(true);
+  btnCalcular.disabled = congruenciasNaoErradas.length !== sistemas.children.length;
+}
+
+
 function criaElementoSimples(elemento, conteudo) {
   const el = document.createElement(elemento);
+    el.tabIndex  = -1;
     el.innerText = conteudo;
 
   return el;
 }
 
 
-function criaInputCongruencia(nome, indice, teclaProximo) {
+function criaInputCongruencia(nome, indice, { proximo, anterior }) {
   const input = document.createElement('input');
     input.id            = `${nome}-${indice}`;
     input.type          = 'text';
-    input.onkeydown     = e => focaProximoInput(e, teclaProximo);
     input.placeholder   = nome;
+    input.onfocus       = e => e.target.selectionStart = e.target.selectionEnd;
+    input.onkeydown     = e => focaInputAoLado(e, proximo, anterior);
     input.onbeforeinput = adaptaInput;
 
   return input;
 }
 
 
+function congruenciasValidas(considerarAvisos = false) {
+  const congruenciasValidas = []
+  for (const congruencia of sistemas.children) {
+    const erro = erroCongruencia(congruencia);
+
+    if (!erro.length || (considerarAvisos && erro[1] === 'aviso')) {
+      congruenciasValidas.push(congruencia);
+    }
+  }
+
+  return congruenciasValidas;
+}
+
+
 function validaCongruencia(e) {
   const congruencia = e.target.parentElement;
   const erroCong    = congruencia.firstChild;
-  if (congruencia.contains(e.relatedTarget)) return;
+
+  if (congruencia.contains(e.relatedTarget) || congruencia === sistemas) return;
   erroCong.replaceChildren();
 
   const erro = erroCongruencia(congruencia);
 
   if (erro.length) {
     adicionaErro(erroCong, erro);
-    if (erro[1] === 'perigo') return;
+  } else {
+    mudaStatusAddCongValida();
   }
 }
 
 
 function adicionaErro(erroCong, tipoErro) {
-  const iconeErro = criaIconeTriangulo(tipoErro[1], tipoErro[0]);
+  const iconeErro = criaIconeErro(tipoErro[1], tipoErro[0]);
   erroCong.appendChild(iconeErro);
 
   if (tipoErro[1] === 'perigo') btnCalcular.disabled = true;
@@ -253,10 +302,10 @@ function erroCongruencia(congruencia) {
 
   if (cNaN && mNaN) return [errosCongruencias.errada, 'aviso'];
   if (mNaN || m === 0) return [errosCongruencias.modulo, 'perigo'];
-  if (cNaN) return [errosCongruencias.modulo, 'perigo'];
+  if (cNaN) return [errosCongruencias.cInvalido, 'perigo'];
 
   if (!temSolucao(isNaN(a) ? 1 : a, c, m)) return [errosCongruencias.semSolucao, 'perigo'];
-  if (a === 0 && c % m === 0) return [errosCongruencias.infinito, 'aviso'];
+  if (a % m === 0 && c % m === 0) return [errosCongruencias.infinito, 'aviso'];
 
   return [];
 }
@@ -267,7 +316,7 @@ function valoresCongruencia(congruencia) {
 }  
 
 
-function criaIconeTriangulo(classe, hint) {
+function criaIconeErro(classe, hint) {
   const container = document.createElement('span');
     container.dataset.hint = hint;
     const icone = document.createElement('i');
@@ -283,7 +332,7 @@ function focaInputMaisProximo(e) {
   let congruencia = e.target;
   const posX      = e.clientX;
 
-  if (congruencia.parentElement !== sistemas) {
+  while (congruencia.parentElement !== sistemas) {
     if (congruencia.id) {
       e.preventDefault();
       return;
@@ -304,12 +353,20 @@ function focaInputMaisProximo(e) {
 }
 
 
-function focaProximoInput(e, teclaProximo) {
-  if (e.key.toUpperCase() === teclaProximo?.toUpperCase()) {
+function focaInputAoLado(e, teclaProximo, teclaAnterior) {
+  const tecla = e.key.toUpperCase();
+
+  const ehTeclaProximo  = tecla === teclaProximo?.toUpperCase();
+  const ehTeclaAnterior = tecla === teclaAnterior?.toUpperCase();
+
+  if (ehTeclaProximo || ehTeclaAnterior) {
     const inputs = e.target.parentElement.querySelectorAll('input');
+
     for (let i = 0; i < inputs.length; i++) {
       if (inputs[i] === e.target) {
-        inputs[i + 1].focus();
+        const desvio = ehTeclaAnterior ? -1 : 1;
+        inputs[i + desvio].focus();
+        break;
       }
     }
   }
@@ -321,7 +378,7 @@ function adaptaInput(e) {
     return;
   }
 
-  const input = e.target;
+  const input   = e.target;
   let quantNums = input.value.length;
 
   if (e.inputType === 'deleteContentBackward') quantNums = Math.max(quantNums - 2, 0);
