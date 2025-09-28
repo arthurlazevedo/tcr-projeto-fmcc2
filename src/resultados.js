@@ -93,7 +93,7 @@ function canonizarSistema(sistema) {
       tabelaMat.appendChild(explicacao(sistemaCanonico[i].explicacao));
       tabelaMat.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
     }
-    tabelaMat.appendChild(espacamento(15));
+    if (i !== sistema.length - 1) tabelaMat.appendChild(espacamento(20));
   }
 
   canonizar.appendChild(matematica);
@@ -156,7 +156,7 @@ function calcularNk(sistema, M) {
       tabelaMat.appendChild(valorVariavel(fracaoSimples(M, [congruencia.m]), { indice }));
       tabelaMat.appendChild(espacamento(5));
       tabelaMat.appendChild(valorVariavel(congruencia.N, { indice }));
-      tabelaMat.appendChild(espacamento(10));
+      tabelaMat.appendChild(espacamento(20));
     })
 
     secaoN.appendChild(matematica);
@@ -180,7 +180,7 @@ function calcularDk(sistema) {
       tabelaMat.appendChild(gerarCongruencia({ a: congruencia.N, c: 1, m: congruencia.m }, idx, { variavel: 'd', adicionaPos: false }));
 
       if (congruencia.N > 1) tabelaMat.appendChild(gerarCongruencia({ a: 1, c: congruencia.d, m: congruencia.m }, idx, { variavel: 'd', adicionaPos: false }));
-      if (idx !== sistema.length -1) tabelaMat.appendChild(espacamento(10));
+      if (idx !== sistema.length -1) tabelaMat.appendChild(espacamento(20));
     });
 
     secaoD.appendChild(matematica);
