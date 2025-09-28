@@ -1,57 +1,61 @@
-import { minimoDivComum, coprimos } from './matematica.js';
+import { maximoDivComum, coprimos, restoPositivo } from './matematica.js';
 import { explicacoes } from '../constantes.js';
 
 export function temSolucao(a, b, mod) {
-  return b % minimoDivComum(a, mod) === 0;
+  // necessário fazer assim para funcionar com bigint e inteiros normais
+  return b % maximoDivComum(a, mod) == 0;
 }
 
 
 export function inversoModular(a, mod) {
   // não tem inverso, retorna um "erro"
-  if (!coprimos(a, mod)) return -1;
+  if (!coprimos(a, mod)) return -1n;
 
-  for (let i = 0; i < mod; i++) {
-    if (a * i % mod === 1) return i;
+  const aNormalizado = restoPositivo(a, mod);
+  for (let i = 0n; i < mod; i++) {
+    if (aNormalizado * i % mod === 1n) return i;
   }
 }
 
 
 export function canonico(congruencia) {
-  return congruencia.a === 1;
+  return congruencia.a === 1n;
 }
 
 
 export function solCongruenciaLinear(a, c, m) {
   if (!temSolucao(a, c, m)) return null;
 
-  if (a === 1) {
-    if (c < m) return { a, c, m, explicacao: explicacoes.canon };
+  if (m < 0n) return { a, c, m: -m, explicacao: explicacoes.negativo, passadaExtra: true };
 
-    return { a, c: c % m, m, explicacao: explicacoes.simples(m, c) };
+  if (a === 1n ) {
+    if (c < m && c >= 0n) return { a, c, m, explicacao: explicacoes.canon };
+
+    return { a, c: restoPositivo(c, m), m, explicacao: explicacoes.simples(m, c) };
   }
 
-  const mdc = minimoDivComum(a, m);
+  const mdc = maximoDivComum(a, m);
   if (a % m === c % m) {
-    if (mdc !== 1) return { a: 1, c: 1, m: Math.floor(m / mdc), explicacao: explicacoes.euclides };
-		if (a === c)   return { a: 1, c: 1, m, explicacao: explicacoes.comum(a) };
+    if (mdc != 1) return { a: 1n, c: 1n, m: m / mdc, explicacao: explicacoes.euclides };
+		if (a === c)  return { a: 1n, c: 1n, m, explicacao: explicacoes.comum(a) };
 
 		const resto = a % m;
-		return { a: resto || 1, c: resto, m, explicacao: explicacoes.simples(m, a, c), talvezNaoResolvido: resto === 1 || !resto };
-
+		return { a: resto || 1n, c: resto, m, explicacao: explicacoes.simples(m, a, c), passadaExtra: resto > 1 };
   }
 
   if (coprimos(a, m)) {
     const inverso = inversoModular(a, m);
-    return { a: 1, c: (c * inverso) % m, m, explicacao: explicacoes.inverso };
+    const novoC   = (c * inverso) % m
+    return { a: 1n, c: novoC, m, explicacao: explicacoes.inverso, passadaExtra: novoC < 0n };
   }
 
-  a = Math.floor(a / mdc);
-  c = Math.floor(c / mdc);
-  m = Math.floor(m / mdc);
+  a = a / mdc;
+  c = c / mdc;
+  m = m / mdc;
 
-  for (let i = 2; i < m; i++) {
-    if ((a * i) % m === c) {
-      return { a: 1, c: i, m, explicacao: explicacoes.euclides };
+  for (let i = 1n; i <= m; i++) {
+    if ((a * i) % m === c % m) {
+      return { a: 1n, c: i, m, explicacao: explicacoes.euclides };
     }
   }
 }

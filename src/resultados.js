@@ -19,11 +19,11 @@ export function resolverSistema(sistema) {
     return;
   }
 
-  if (!sistemaCanonico(sistema)) {  
-    sistema = canonizaSistema(sistema);
+  if (!sistemaCanonico(sistema)) {
+    sistema = canonizarSistema(sistema);
     mods    = sistema.map(congruencia => congruencia.m);
   }
-  exibeSistema(sistema, true);
+  exibirSistema(sistema, true);
 
   const M = calcularM(mods);
   separarCk(sistema);
@@ -50,7 +50,7 @@ function reportaErroSistema(sistema, incorretos) {
   resultados.appendChild(secaoErro);
 }
 
-function exibeSistema(sistema) {
+function exibirSistema(sistema) {
   const secaoSistema = document.createElement('section');
     const tituloSistema = criarTitulo('Resolver o seguinte sistema de congruências utilizando o <i>TCR</i>');
 
@@ -60,7 +60,7 @@ function exibeSistema(sistema) {
 }
 
 
-function canonizaSistema(sistema) {
+function canonizarSistema(sistema) {
   const sistemaCanonico = sistema.map(({ a, c, m }) => solCongruenciaLinear(a, c, m));
   canonizar.classList.add('display');
 
@@ -85,6 +85,14 @@ function canonizaSistema(sistema) {
     tabelaMat.appendChild(gerarCongruencia(sistema[i], i));
     tabelaMat.appendChild(explicacao(sistemaCanonico[i].explicacao));
     tabelaMat.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
+    
+    while (sistemaCanonico[i].passadaExtra) {
+      const { a, c, m } = sistemaCanonico[i];
+      sistemaCanonico[i] = solCongruenciaLinear(a, c, m);
+      
+      tabelaMat.appendChild(explicacao(sistemaCanonico[i].explicacao));
+      tabelaMat.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
+    }
     tabelaMat.appendChild(espacamento(15));
   }
 
@@ -96,7 +104,7 @@ function canonizaSistema(sistema) {
 
 function calcularM(mods) {
   const M = multiplicaLista(mods);
-  
+
   const secaoM = document.createElement('section');
     const tituloM = criarTitulo('Passo 1.', 'margem-acima');
     const descM   = criarDescricao('Calcular o módulo da solução final (<i>M</i>)');
@@ -150,7 +158,7 @@ function calcularNk(sistema, M) {
       tabelaMat.appendChild(valorVariavel(congruencia.N, { indice }));
       tabelaMat.appendChild(espacamento(10));
     })
-  
+
     secaoN.appendChild(matematica);
   resultados.appendChild(secaoN);
 }
@@ -192,7 +200,7 @@ function resultadoFinal(sistema, M) {
     secaoResultado.appendChild(descRes);
 
     const [matematica, tabelaMat] = criarParenteMath();
-    const resolucao = resolucaoPassoPasso('x', sistemaNecessario, resultadoFinal, ['+', vezesPonto], M);  
+    const resolucao = resolucaoPassoPasso('x', sistemaNecessario, resultadoFinal, ['+', vezesPonto], M);
     tabelaMat.appendChild(resolucao);
 
     secaoResultado.appendChild(matematica);
@@ -213,7 +221,7 @@ function criarDescricao(desc) {
   const descricao = document.createElement('span');
     descricao.className = 'descricao-secao'
     descricao.innerHTML = desc;
-  
+
   return descricao;
 }
 

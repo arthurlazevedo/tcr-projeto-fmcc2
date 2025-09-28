@@ -141,7 +141,7 @@ function gerarA(valorA, variavel, indice) {
   const celula   = criarElementoMath('mtd');
     const linha = criarElementoMath('mrow');
 
-    if (valorA && valorA !== 1) {
+    if (valorA && valorA !== 1n) {
       const a = criarCelulaSimples(valorA, { indice, comoCelula: false });
       const vezes = operacao(vezesInv);
 
@@ -166,7 +166,7 @@ function gerarMod(modulo, indice) {
     const modLinha = criarElementoMath('mrow');
 
       modLinha.appendChild(operacao('('));
-  
+
       const funcaoMod = criarElementoMath('mrow');
       funcaoMod.insertAdjacentHTML('beforeend', representarPalavraMi('mod'));
       funcaoMod.style = 'margin-right:5px;'

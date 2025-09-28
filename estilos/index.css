@@ -59,7 +59,7 @@ input::placeholder {
 }
 
 
-#adicionar-congruencias {
+#acoes-congruencias {
   font-size : 2.2rem;
   position  : absolute;
   z-index   : 1;
@@ -68,11 +68,11 @@ input::placeholder {
   top       : 9px;
 }
 
-#adicionar-congruencias > #opcoes-adicao.escondido {
+#acoes-congruencias > #menu-opcoes.escondido {
   display: none;
 }
 
-#opcoes-adicao {
+#menu-opcoes {
   border-bottom : 0 !important;
   font-family   : sans-serif;
   background    : white;
@@ -81,14 +81,14 @@ input::placeholder {
   display       : block;
   z-index       : 1;
   border        : 1px solid #c0ccda;
-  height        : 80px;
+  height        : 120.6px;
   color         : var(--hint);
   width         : 300px;
   left          : -7.5px;
   top           : 45px;
 }
 
-#opcoes-adicao::before {
+#menu-opcoes::before {
   background : white;
   clip-path  : var(--triangulo);
   position   : absolute;
@@ -101,40 +101,42 @@ input::placeholder {
   top        : -10px;
 }
 
-#opcoes-adicao:has(> span:first-child:hover)::before {
+#menu-opcoes:has(> span:first-child:hover)::before {
   background: var(--opcoes-hover);
 }
 
-#opcoes-adicao > span {
+#menu-opcoes > span {
   border-bottom : 1px solid #c0ccda;
+  user-select   : none;
   text-align    : center;
   display       : block;
   padding       : 10px;
   cursor        : pointer;
 }
 
-#opcoes-adicao > span:hover {
+#menu-opcoes > span:hover {
   background: var(--opcoes-hover);
 }
 
-#opcoes-adicao > span.desabilitado {
+#menu-opcoes > span.desabilitado {
   background : rgb(192, 192, 192);
   cursor     : not-allowed;
 }
 
 
 #calcular {
-  background : inherit;
-  font-size  : 1.5rem;
-  position   : absolute;
-  padding    : 4px 7px;
-  cursor     : pointer;
-  height     : 40px;
-  bottom     : 5px;
-  border     : 0;
-  color      : white;
-  width      : 150px;
-  right      : 0;
+  user-select : none;
+  background  : inherit;
+  font-size   : 1.5rem;
+  position    : absolute;
+  padding     : 4px 7px;
+  cursor      : pointer;
+  height      : 40px;
+  bottom      : 5px;
+  border      : 0;
+  color       : white;
+  width       : 150px;
+  right       : 0;
 }
 
 #calcular:disabled {
@@ -367,7 +369,7 @@ input::placeholder {
 }
 
 .aviso {
-  color: var(--aviso);
+  color: var(--aviso) !important;
 }
 
 

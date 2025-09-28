@@ -22,5 +22,5 @@ export function calculaN(M, m) {
 export function resultadoSistema(cdn) {
   return cdn.reduce((somatorio, atual) => {
     return somatorio + multiplicaLista(atual);
-  }, 0);
+  }, 0n);
 }

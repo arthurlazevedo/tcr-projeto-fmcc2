@@ -36,8 +36,8 @@ function repete(string, quant) {
 }
 
 
-export function ehNumero(param) {
-  return !isNaN(param);
+export function ehNumero(num) {
+  return typeof num === 'bigint' || !isNaN(num);
 }
 
 
