@@ -36,7 +36,6 @@ opcoesCong.firstElementChild.onclick = () => {
   a.focus();
 };
 
-// TODO: permitir deletar todos?
 opcoesCong.children[1].onclick = e => {
   if (e.target.classList.contains('desabilitado')) return;
 
