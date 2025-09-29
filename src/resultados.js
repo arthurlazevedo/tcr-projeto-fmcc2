@@ -85,11 +85,11 @@ function canonizarSistema(sistema) {
     tabelaMat.appendChild(gerarCongruencia(sistema[i], i));
     tabelaMat.appendChild(explicacao(sistemaCanonico[i].explicacao));
     tabelaMat.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
-    
+
     while (sistemaCanonico[i].passadaExtra) {
       const { a, c, m } = sistemaCanonico[i];
       sistemaCanonico[i] = solCongruenciaLinear(a, c, m);
-      
+
       tabelaMat.appendChild(explicacao(sistemaCanonico[i].explicacao));
       tabelaMat.appendChild(gerarCongruencia(sistemaCanonico[i], i, { adicionaPos: false }));
     }

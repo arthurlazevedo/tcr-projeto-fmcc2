@@ -20,6 +20,8 @@ Seguidas as condições listadas, podemos calcular a solução do sistema de n c
 4. Cálculo do d<sub>i</sub> de cada congruência, sendo d<sub>i</sub> ≡ N<sub>i</sub><sup>-1</sup> (*mod m*<sub>i</sub>)
 5. Cálculo do da solução final, sabendo que: x ≡ c<sub>1</sub> · N<sub>1</sub> · d<sub>1</sub> + ... + c<sub>n</sub> · N<sub>n</sub> · d<sub>n</sub> (*mod M*)
 
+Dessa forma, nosso site explica detalhadamente a solução para cada etapa do TCR, fazendo um pré-processamento adicional antes disso para transformar as soluções em sua forma canônica, caso necessário.
+
 ## Membros do Grupo
 - Anderson Breno
 - Arthur Ledra
@@ -28,7 +30,7 @@ Seguidas as condições listadas, podemos calcular a solução do sistema de n c
 
 ## Acesso ao site
 
-Foi feito deploy do site via GitHubPages, podendo ser acessado via esse [link](https://arthurlazevedo.github.io/tcr-projeto-fmcc2/)
+Foi feito deploy do site via GitHubPages, logo, ele pode ser acessado via esse [link](https://arthurlazevedo.github.io/tcr-projeto-fmcc2/)
 
 ## Rodar localmente
 

@@ -22,7 +22,7 @@ adicaoCong.onblur = () => {
 
 adicaoCong.onclick = e => {
   if (e.target !== adicaoCong) return;
-  
+
   if (opcoesCong.classList.contains('escondido')) {
     opcoesCong.classList.remove('escondido');
   } else {
@@ -235,7 +235,7 @@ function mudaStatusAddCongValida() {
   const congruencias  = congruenciasValidas();
 
   if (congruencias.length >= 9) {
-    addCongValida.title = 'Desabilitado pois estourou o limite (10)';
+    addCongValida.title = 'Limite máximo de congruências (10) para a adição aleatória atingido';
     addCongValida.classList.add('desabilitado');
   } else {
     addCongValida.title = 'Adiciona uma congruência válida ao sistema';
@@ -272,6 +272,11 @@ function criaInputCongruencia(nome, indice, { proximo, anterior }) {
 }
 
 
+function valoresCongruencia(congruencia) {
+  return Array.from(congruencia.querySelectorAll('input')).map(input => parseInt(input.value));
+}
+
+
 function congruenciasValidas(considerarAvisos = false) {
   const congruenciasValidas = []
   for (const congruencia of sistemas.children) {
@@ -295,13 +300,13 @@ function validaCongruencia(e) {
 
   const erro = erroCongruencia(congruencia);
   if (erro.length) adicionaErro(erroCong, erro);
-  
+
   if (erro[1] === 'aviso' || !erro.length) mudaStatusBtnCalcular();
 }
 
 
 function adicionaErro(erroCong, tipoErro) {
-  const iconeErro = criaIconeErro(tipoErro[1], tipoErro[0]);
+  const iconeErro = criaIcone(tipoErro[1], tipoErro[0]);
   erroCong.appendChild(iconeErro);
 
   if (tipoErro[1] === 'perigo') btnCalcular.disabled = true;
@@ -318,18 +323,13 @@ function erroCongruencia(congruencia) {
   if (cNaN) return [errosCongruencias.cInvalido, 'perigo'];
 
   if (!temSolucao(isNaN(a) ? 1 : a, c, m)) return [errosCongruencias.semSolucao, 'perigo'];
-  if (a % m === 0 && c % m === 0) return [errosCongruencias.infinito, 'aviso'];
+  if ((a % m === 0 && c % m === 0) || m === 1) return [errosCongruencias.infinito, 'aviso'];
 
   return [];
 }
 
 
-function valoresCongruencia(congruencia) {
-  return Array.from(congruencia.querySelectorAll('input')).map(input => parseInt(input.value));
-}
-
-
-function criaIconeErro(classe, hint) {
+function criaIcone(classe, hint) {
   const container = document.createElement('span');
     container.dataset.hint = hint;
     const icone = document.createElement('i');
@@ -367,18 +367,19 @@ function focaInputMaisProximo(e) {
 
 
 function focaInputAoLado(e, teclaProximo, teclaAnterior) {
-  const tecla = e.key.toUpperCase();
+  const inputAtual = e.target;
+  const tecla      = e.key.toUpperCase();
 
-  const ehTeclaProximo  = tecla === teclaProximo?.toUpperCase();
-  const ehTeclaAnterior = tecla === teclaAnterior?.toUpperCase();
+  const ehTeclaProximo  = tecla === teclaProximo?.toUpperCase() || e.ctrlKey && inputAtual.selectionStart === inputAtual.value.length && e.key === 'ArrowRight';
+  const ehTeclaAnterior = tecla === teclaAnterior?.toUpperCase() || e.ctrlKey && inputAtual.selectionStart === 0 && e.key === 'ArrowLeft';
 
   if (ehTeclaProximo || ehTeclaAnterior) {
-    const inputs = e.target.parentElement.querySelectorAll('input');
+    const inputs = inputAtual.parentElement.querySelectorAll('input');
 
     for (let i = 0; i < inputs.length; i++) {
       if (inputs[i] === e.target) {
         const desvio = ehTeclaAnterior ? -1 : 1;
-        inputs[i + desvio].focus();
+        if (inputs[i + desvio]) inputs[i + desvio].focus();
         break;
       }
     }

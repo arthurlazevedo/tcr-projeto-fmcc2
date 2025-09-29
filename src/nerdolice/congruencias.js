@@ -28,10 +28,16 @@ export function solCongruenciaLinear(a, c, m) {
 
   if (m < 0n) return { a, c, m: -m, explicacao: explicacoes.negativo, passadaExtra: true };
 
-  if (a === 1n ) {
+  if (a === 1n) {
     if (c < m && c >= 0n) return { a, c, m, explicacao: explicacoes.canon };
 
     return { a, c: restoPositivo(c, m), m, explicacao: explicacoes.simples(m, c) };
+  }
+
+  if (coprimos(a, m)) {
+    const inverso = inversoModular(a, m);
+    const novoC   = (c * inverso) % m
+    return { a: 1n, c: novoC, m, explicacao: explicacoes.inverso, passadaExtra: novoC < 0n };
   }
 
   const mdc = maximoDivComum(a, m);
@@ -43,18 +49,12 @@ export function solCongruenciaLinear(a, c, m) {
 		return { a: resto || 1n, c: resto, m, explicacao: explicacoes.simples(m, a, c), passadaExtra: resto > 1 };
   }
 
-  if (coprimos(a, m)) {
-    const inverso = inversoModular(a, m);
-    const novoC   = (c * inverso) % m
-    return { a: 1n, c: novoC, m, explicacao: explicacoes.inverso, passadaExtra: novoC < 0n };
-  }
-
   a = a / mdc;
   c = c / mdc;
   m = m / mdc;
 
   for (let i = 1n; i <= m; i++) {
-    if ((a * i) % m === c % m) {
+    if (restoPositivo(a * i, m) === restoPositivo(c, m)) {
       return { a: 1n, c: i, m, explicacao: explicacoes.euclides };
     }
   }

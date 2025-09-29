@@ -1,4 +1,5 @@
 :root {
+  --tamanho-menu : 460px;
   --opcoes-hover : rgb(235, 230, 230);
   --triangulo    : polygon(0% 100%, 50% 0%, 100% 100%);
   --perigo       : rgb(238, 70, 67);
@@ -156,7 +157,7 @@ input::placeholder {
   position       : relative;
   display        : flex;
   height         : 100vh;
-  width          : 460px;
+  width          : var(--tamanho-menu);
 }
 
 
@@ -281,7 +282,7 @@ input::placeholder {
   background-color : var(--menu);
   flex-direction   : column !important;
   box-sizing       : content-box;
-  max-width        : calc(100vw - 460px);
+  max-width        : calc(100vw - var(--tamanho-menu));
   flex-grow        : 1;
   position         : relative;
   padding          : 50px 20px 20px 20px;
